@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import {
@@ -39,31 +39,171 @@ import {
 
 const drawerWidth = 240;
 
-const MainLayout = () => {
+const MainLayout = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const dispatch = useDispatch();
+  const [open, setOpen] = useState(!isMobile);
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const menuOpen = Boolean(anchorEl);
+  
+  useEffect(() => {
+    // Close drawer on mobile when page changes
+    if (isMobile) {
+      setOpen(false);
+    }
+  }, [location, isMobile]);
+  
+  useEffect(() => {
+    console.log('MainLayout - Current user:', user);
+    console.log('MainLayout - User role:', user?.role);
+    
+    // If user data changes in Redux, update the local state
+    if (!user) {
+      // Check if user data exists in localStorage
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      if (localUser) {
+        console.log('Found user in localStorage:', localUser);
+        // Dispatch to update Redux state with user from localStorage
+        dispatch({ type: 'auth/setUser', payload: localUser });
+      }
+    }
+  }, [user, dispatch]);
+  
+  const handleDrawerOpen = () => {
+    setOpen(true);
   };
-
+  
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+  
+  const toggleDrawer = () => {
+    setOpen(!open);
+  };
+  
+  const handleMenuClick = (path) => {
+    navigate(path);
+    if (isMobile) {
+      setOpen(false);
+    }
+  };
+  
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
+  
   const handleProfileMenuClose = () => {
     setAnchorEl(null);
   };
-
+  
+  const handleProfileClick = () => {
+    navigate('/profile');
+    handleProfileMenuClose();
+  };
+  
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
+    handleProfileMenuClose();
+  };
+  
+  // Get the correct role-specific menu items based on user role
+  const getRoleBasedMenuItems = () => {
+    const userRole = user?.role || localStorage.getItem('userRole') || 'student';
+    console.log('Getting menu items for role:', userRole);
+    
+    switch(userRole) {
+      case 'admin':
+        return adminMenuItems || [];
+      case 'teacher':
+        return teacherMenuItems;
+      case 'student':
+      default:
+        return studentMenuItems;
+    }
+  };
+  
+  const renderSidebar = () => {
+    return (
+      <List component="nav">
+        {/* Dashboard Link */}
+        <ListItem 
+          button 
+          onClick={() => handleMenuClick('/dashboard')}
+          selected={location.pathname === '/dashboard'}
+          sx={{
+            py: 1.5,
+            '&.Mui-selected': {
+              bgcolor: 'rgba(0, 0, 0, 0.08)',
+            },
+            '&:hover': {
+              bgcolor: 'rgba(0, 0, 0, 0.05)',
+            },
+          }}
+        >
+          <ListItemIcon>
+            <DashboardIcon color="primary" />
+          </ListItemIcon>
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        
+        <Divider sx={{ my: 1 }} />
+        
+        {/* Role-based menu items */}
+        {getRoleBasedMenuItems().map((item) => (
+          <ListItem
+            button
+            key={item.text}
+            onClick={() => handleMenuClick(item.path)}
+            selected={location.pathname === item.path}
+            sx={{
+              py: 1.5,
+              '&.Mui-selected': {
+                bgcolor: 'rgba(0, 0, 0, 0.08)',
+              },
+              '&:hover': {
+                bgcolor: 'rgba(0, 0, 0, 0.05)',
+              },
+            }}
+          >
+            <ListItemIcon>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+        
+        <Divider sx={{ my: 1 }} />
+        
+        {/* Common menu items - messaging, notices, calendar */}
+        {commonMenuItems.map((item) => (
+          <ListItem
+            button
+            key={item.text}
+            onClick={() => handleMenuClick(item.path)}
+            selected={location.pathname === item.path}
+            sx={{
+              py: 1.5,
+              '&.Mui-selected': {
+                bgcolor: 'rgba(0, 0, 0, 0.08)',
+              },
+              '&:hover': {
+                bgcolor: 'rgba(0, 0, 0, 0.05)',
+              },
+            }}
+          >
+            <ListItemIcon>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+    );
   };
 
   // Sidebar menu items - Common for all users
@@ -138,9 +278,24 @@ const MainLayout = () => {
     },
   ];
 
-  // Get menu items based on user role
-  const roleBasedMenuItems =
-    user?.role === 'student' ? studentMenuItems : teacherMenuItems;
+  // Admin-specific menu items
+  const adminMenuItems = [
+    {
+      text: 'User Management',
+      icon: <PersonIcon />,
+      path: '/admin/users',
+    },
+    {
+      text: 'Department Management',
+      icon: <SchoolIcon />,
+      path: '/admin/departments',
+    },
+    {
+      text: 'Course Management',
+      icon: <SchoolIcon />,
+      path: '/admin/courses',
+    },
+  ];
 
   const drawer = (
     <>
@@ -153,41 +308,11 @@ const MainLayout = () => {
         }}
       >
         <Typography variant="h6" noWrap component="div" color="primary">
-          College Portal
+          {getPageTitle(location.pathname, user?.role || localStorage.getItem('userRole') || 'student')}
         </Typography>
       </Toolbar>
       <Divider />
-      <List>
-        {commonMenuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              onClick={() => {
-                navigate(item.path);
-                if (isMobile) setMobileOpen(false);
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {roleBasedMenuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              onClick={() => {
-                navigate(item.path);
-                if (isMobile) setMobileOpen(false);
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      {renderSidebar()}
     </>
   );
 
@@ -206,7 +331,7 @@ const MainLayout = () => {
             color="inherit"
             aria-label="open drawer"
             edge="start"
-            onClick={handleDrawerToggle}
+            onClick={toggleDrawer}
             sx={{ mr: 2, display: { md: 'none' } }}
           >
             <MenuIcon />
@@ -228,7 +353,7 @@ const MainLayout = () => {
             </IconButton>
             <Menu
               anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
+              open={menuOpen}
               onClose={handleProfileMenuClose}
               anchorOrigin={{
                 vertical: 'bottom',
@@ -240,10 +365,7 @@ const MainLayout = () => {
               }}
             >
               <MenuItem
-                onClick={() => {
-                  navigate('/dashboard/profile');
-                  handleProfileMenuClose();
-                }}
+                onClick={handleProfileClick}
               >
                 <ListItemIcon>
                   <PersonIcon fontSize="small" />
@@ -268,8 +390,8 @@ const MainLayout = () => {
       >
         <Drawer
           variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
+          open={open}
+          onClose={handleDrawerClose}
           ModalProps={{
             keepMounted: true,
           }}

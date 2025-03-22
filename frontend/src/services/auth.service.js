@@ -2,37 +2,41 @@ import axios from 'axios';
 
 const API_URL = '/api/auth';
 
-// Mock user database
+// Enhanced mock users with additional data
 const MOCK_USERS = [
   {
     _id: 'admin123',
+    name: 'Admin User',
     email: 'admin@college.edu',
     password: 'admin123',
-    name: 'Admin User',
-    registrationNumber: 'ADM2023001',
     role: 'admin',
     department: 'Administration',
-    token: 'mock-jwt-token-admin'
+    phoneNumber: '9876543210',
+    token: 'mock-admin-token-12345'
   },
   {
     _id: 'teacher123',
+    name: 'Teacher User',
     email: 'teacher@college.edu',
     password: 'teacher123',
-    name: 'John Smith',
-    registrationNumber: 'TCH2023001',
     role: 'teacher',
     department: 'Computer Science',
-    token: 'mock-jwt-token-teacher'
+    subjects: ['Web Development', 'Database Systems'],
+    phoneNumber: '9876543211',
+    token: 'mock-teacher-token-12345'
   },
   {
     _id: 'student123',
+    name: 'Student User',
     email: 'student@college.edu',
     password: 'student123',
-    name: 'Jane Doe',
-    registrationNumber: 'CS2023001',
     role: 'student',
+    registrationNumber: 'CS2023001',
     department: 'Computer Science',
-    token: 'mock-jwt-token-student'
+    year: 3,
+    semester: 5,
+    phoneNumber: '9876543212',
+    token: 'mock-student-token-12345'
   }
 ];
 
@@ -50,52 +54,58 @@ const register = async (userData) => {
 
 // Login user
 const login = async (userData) => {
-  console.log('AuthService login attempt with:', userData);
-  
+  console.log('Login attempt with:', userData);
+
   try {
-    // Try to connect to the backend
-    console.log('Attempting to connect to backend at', `${API_URL}/login`);
-    const response = await axios.post(`${API_URL}/login`, userData);
+    // Try to connect to the backend first
+    console.log('Attempting to connect to backend...');
+    const response = await axios.post(`${API_URL}/auth/login`, userData);
     
-    console.log('Backend login response:', response);
-    
+    // If login is successful
     if (response.data) {
-      localStorage.setItem('user', JSON.stringify(response.data.data));
-      localStorage.setItem('token', response.data.data.token);
+      console.log('Backend login successful:', response.data);
+      
+      // Store user in localStorage
+      const user = response.data;
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', user.token);
       localStorage.setItem('isAuthenticated', 'true');
+      
+      console.log('Role assigned from backend:', user.role);
+      return user;
     }
-    
-    return response.data.data;
   } catch (error) {
-    console.log('Backend connection failed, using mock login instead');
-    console.log('Error details:', error.message);
+    console.log('Backend connection failed, using mock data:', error.message);
     
-    // Fall back to mock login
-    console.log('Checking mock user database for:', userData.identifier);
+    // Mock login with predefined user data
+    const { email, password } = userData;
     
-    // Check if the user exists in our mock database
-    const foundUser = MOCK_USERS.find(user => 
-      (user.email === userData.identifier || user.registrationNumber === userData.identifier) && 
-      user.password === userData.password
+    // Find user with matching email and password
+    console.log('Searching for mock user with email:', email);
+    const foundUser = MOCK_USERS.find(
+      user => user.email === email && user.password === password
     );
     
     if (foundUser) {
-      console.log('Mock user found:', foundUser.email);
+      console.log('Mock user found! Role:', foundUser.role);
       
-      // Create a copy without the password field for security
+      // Create a copy of the user object without the password
       const { password, ...userWithoutPassword } = foundUser;
       
-      // Store in localStorage for persistence
+      // Store user in localStorage
       localStorage.setItem('user', JSON.stringify(userWithoutPassword));
       localStorage.setItem('token', userWithoutPassword.token);
       localStorage.setItem('isAuthenticated', 'true');
       
-      console.log('Mock login successful, returning user:', userWithoutPassword);
+      // Double check what's stored in localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      console.log('Stored user from localStorage:', storedUser);
+      console.log('User role in localStorage:', storedUser.role);
+      
       return userWithoutPassword;
     } else {
-      console.log('Mock login failed - invalid credentials');
-      // If credentials don't match, reject with an error
-      throw new Error('Invalid email/registration number or password');
+      console.log('Invalid mock credentials');
+      throw new Error('Invalid email or password');
     }
   }
 };

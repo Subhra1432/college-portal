@@ -101,6 +101,39 @@ const Login = () => {
       identifier: 'student@college.edu',
       password: 'student123',
     });
+    
+    // Check if student role is properly set in mock data
+    console.log('Student Mock User:', MOCK_USERS.find(user => 
+      user.email === 'student@college.edu' && user.password === 'student123'
+    ));
+  };
+  
+  // Debug function to check localStorage content
+  const checkLocalStorage = () => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      const storedToken = localStorage.getItem('token');
+      const storedIsAuthenticated = localStorage.getItem('isAuthenticated');
+      
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('User in localStorage:', parsedUser);
+        console.log('User role:', parsedUser.role);
+      } else {
+        console.log('No user in localStorage');
+      }
+      
+      console.log('Token in localStorage:', storedToken);
+      console.log('isAuthenticated in localStorage:', storedIsAuthenticated);
+      
+      setDebugInfo(prev => prev + '\n\nLocalStorage Content:\n' + 
+        `user: ${storedUser}\n` +
+        `token: ${storedToken}\n` +
+        `isAuthenticated: ${storedIsAuthenticated}`
+      );
+    } catch (error) {
+      console.error('Error checking localStorage:', error);
+    }
   };
 
   return (
@@ -242,6 +275,15 @@ const Login = () => {
           sx={{ ml: 1, mb: 1 }}
         >
           Force Dashboard
+        </Button>
+        <Button 
+          variant="outlined" 
+          color="info" 
+          size="small" 
+          onClick={checkLocalStorage}
+          sx={{ mr: 1, mb: 1 }}
+        >
+          Check Local Storage
         </Button>
         {debugInfo && (
           <Box 
