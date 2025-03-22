@@ -6,8 +6,36 @@ import AuthService from '../../services/auth.service';
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, thunkAPI) => {
   try {
     console.log('checkAuth thunk: Checking if user is authenticated');
+    
+    // First check localStorage directly for faster access
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('checkAuth thunk: Found user in localStorage:', parsedUser);
+        
+        // Return the user from localStorage first for immediate authentication
+        setTimeout(() => {
+          // After a short delay, also try to validate with the backend
+          // This is a non-blocking operation that will quietly update the state if successful
+          AuthService.getCurrentUser().catch(e => 
+            console.log('Background validation failed, but using cached user:', e.message)
+          );
+        }, 100);
+        
+        return parsedUser;
+      } catch (parseError) {
+        console.log('checkAuth thunk: Error parsing stored user:', parseError.message);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
+    }
+    
+    // If no stored user or parsing failed, try to get from backend
+    console.log('checkAuth thunk: No valid user in localStorage, checking backend');
     const user = await AuthService.getCurrentUser();
-    console.log('checkAuth thunk: User authenticated:', user);
+    console.log('checkAuth thunk: User authenticated from backend:', user);
     return user;
   } catch (error) {
     console.log('checkAuth thunk: Authentication failed:', error.message);

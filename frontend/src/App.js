@@ -38,32 +38,52 @@ const App = () => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    console.log('App.js: Initial render, checking auth status');
     dispatch(checkAuth());
   }, [dispatch]);
 
+  useEffect(() => {
+    console.log('App.js: Auth state changed:', { isAuthenticated, user, loading });
+  }, [isAuthenticated, user, loading]);
+
   // Protected route component
   const ProtectedRoute = ({ children }) => {
-    if (loading) return <div>Loading...</div>;
+    console.log('ProtectedRoute: Checking auth status:', { isAuthenticated, loading });
+    
+    if (loading) {
+      console.log('ProtectedRoute: Still loading, showing loading indicator');
+      return <div>Loading...</div>;
+    }
     
     if (!isAuthenticated) {
+      console.log('ProtectedRoute: Not authenticated, redirecting to login');
       return <Navigate to="/login" />;
     }
 
+    console.log('ProtectedRoute: Authenticated, rendering children');
     return children;
   };
 
   // Role-based protected route
   const RoleRoute = ({ roles, children }) => {
-    if (loading) return <div>Loading...</div>;
+    console.log('RoleRoute: Checking auth and role:', { isAuthenticated, userRole: user?.role, expectedRoles: roles, loading });
+    
+    if (loading) {
+      console.log('RoleRoute: Still loading, showing loading indicator');
+      return <div>Loading...</div>;
+    }
     
     if (!isAuthenticated) {
+      console.log('RoleRoute: Not authenticated, redirecting to login');
       return <Navigate to="/login" />;
     }
 
     if (!roles.includes(user?.role)) {
+      console.log('RoleRoute: User does not have required role, redirecting to dashboard');
       return <Navigate to="/dashboard" />;
     }
 
+    console.log('RoleRoute: User has required role, rendering children');
     return children;
   };
 

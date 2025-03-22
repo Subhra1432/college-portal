@@ -62,6 +62,7 @@ const login = async (userData) => {
     if (response.data) {
       localStorage.setItem('user', JSON.stringify(response.data.data));
       localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('isAuthenticated', 'true');
     }
     
     return response.data.data;
@@ -87,6 +88,7 @@ const login = async (userData) => {
       // Store in localStorage for persistence
       localStorage.setItem('user', JSON.stringify(userWithoutPassword));
       localStorage.setItem('token', userWithoutPassword.token);
+      localStorage.setItem('isAuthenticated', 'true');
       
       console.log('Mock login successful, returning user:', userWithoutPassword);
       return userWithoutPassword;

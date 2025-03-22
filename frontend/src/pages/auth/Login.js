@@ -62,6 +62,17 @@ const Login = () => {
         const directResult = await AuthService.login(values);
         console.log('Direct login result:', directResult);
         setDebugInfo(prev => prev + '\n\nDirect login result:\n' + JSON.stringify(directResult, null, 2));
+        
+        // Force navigation after successful login
+        if (directResult) {
+          console.log('Login successful, forcing navigation to dashboard');
+          
+          // Give Redux time to update, but force navigation after a short delay anyway
+          setTimeout(() => {
+            console.log('Navigating to dashboard after login');
+            navigate('/dashboard');
+          }, 500);
+        }
       } catch (directError) {
         console.error('Direct login error:', directError);
         setDebugInfo(prev => prev + '\n\nDirect login error:\n' + JSON.stringify(directError.message, null, 2));
