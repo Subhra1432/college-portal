@@ -35,6 +35,10 @@ import {
   School as SchoolIcon,
   Logout as LogoutIcon,
   ArrowDropDown as ArrowDropDownIcon,
+  MenuBook as MenuBookIcon,
+  People as PeopleIcon,
+  Assessment as AssessmentIcon,
+  EventAvailable as EventAvailableIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -235,46 +239,107 @@ const MainLayout = ({ children }) => {
     },
   ];
 
-  // Student-specific menu items
+  // Student Menu Items
   const studentMenuItems = [
     {
-      text: 'Attendance',
-      icon: <SchoolIcon />,
-      path: '/dashboard/attendance',
+      id: 'student-dashboard',
+      title: 'Dashboard',
+      type: 'item',
+      url: '/dashboard',
+      icon: <DashboardIcon />,
+      text: 'Dashboard',
     },
     {
-      text: 'Payments',
-      icon: <PaymentIcon />,
-      path: '/dashboard/payments',
+      id: 'student-courses',
+      title: 'Courses',
+      type: 'item',
+      url: '/courses',
+      icon: <MenuBookIcon />,
+      text: 'Courses',
     },
     {
-      text: 'Results',
-      icon: <GradeIcon />,
-      path: '/dashboard/results',
-    },
-    {
-      text: 'Assignments',
+      id: 'student-syllabus',
+      title: 'Syllabus',
+      type: 'item',
+      url: '/student/syllabus',
       icon: <AssignmentIcon />,
-      path: '/dashboard/assignments',
+      text: 'Syllabus',
+    },
+    {
+      id: 'student-assignments',
+      title: 'Assignments',
+      type: 'item',
+      url: '/assignments',
+      icon: <AssignmentIcon />,
+      text: 'Assignments',
+    },
+    {
+      id: 'student-grades',
+      title: 'Grades',
+      type: 'item',
+      url: '/grades',
+      icon: <GradeIcon />,
+      text: 'Grades',
+    },
+    {
+      id: 'student-attendance',
+      title: 'Attendance',
+      type: 'item',
+      url: '/attendance',
+      icon: <EventAvailableIcon />,
+      text: 'Attendance',
     },
   ];
 
-  // Teacher-specific menu items
+  // Teacher Menu Items
   const teacherMenuItems = [
     {
-      text: 'Upload Attendance',
-      icon: <SchoolIcon />,
-      path: '/dashboard/upload-attendance',
+      id: 'teacher-dashboard',
+      title: 'Dashboard',
+      type: 'item',
+      url: '/dashboard',
+      icon: <DashboardIcon />,
+      text: 'Dashboard',
     },
     {
-      text: 'Upload Marks',
-      icon: <GradeIcon />,
-      path: '/dashboard/upload-marks',
+      id: 'teacher-courses',
+      title: 'Courses',
+      type: 'item',
+      url: '/courses',
+      icon: <MenuBookIcon />,
+      text: 'Courses',
     },
     {
-      text: 'Manage Assignments',
+      id: 'teacher-syllabus',
+      title: 'Syllabus Management',
+      type: 'item',
+      url: '/teacher/syllabus-management',
       icon: <AssignmentIcon />,
-      path: '/dashboard/manage-assignments',
+      text: 'Syllabus Management',
+    },
+    {
+      id: 'teacher-students',
+      title: 'Students',
+      type: 'item',
+      url: '/students',
+      icon: <PeopleIcon />,
+      text: 'Students',
+    },
+    {
+      id: 'teacher-assessments',
+      title: 'Assessments',
+      type: 'item',
+      url: '/assessments',
+      icon: <AssessmentIcon />,
+      text: 'Assessments',
+    },
+    {
+      id: 'teacher-attendance',
+      title: 'Attendance',
+      type: 'item',
+      url: '/attendance',
+      icon: <EventAvailableIcon />,
+      text: 'Attendance',
     },
   ];
 

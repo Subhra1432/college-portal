@@ -21,11 +21,13 @@ import Attendance from './pages/student/Attendance';
 import Payments from './pages/student/Payments';
 import Results from './pages/student/Results';
 import Assignments from './pages/student/Assignments';
+import Syllabus from './pages/student/Syllabus';
 
 // Teacher pages
 import UploadAttendance from './pages/teacher/UploadAttendance';
 import UploadMarks from './pages/teacher/UploadMarks';
 import ManageAssignments from './pages/teacher/ManageAssignments';
+import SyllabusManagement from './pages/teacher/SyllabusManagement';
 
 // Shared pages
 import Messages from './pages/messages/Messages';
@@ -172,6 +174,14 @@ const App = () => {
             </RoleRoute>
           }
         />
+        <Route
+          path="syllabus"
+          element={
+            <RoleRoute roles={['student']}>
+              <Syllabus />
+            </RoleRoute>
+          }
+        />
 
         {/* Teacher Routes */}
         <Route
@@ -195,6 +205,14 @@ const App = () => {
           element={
             <RoleRoute roles={['teacher']}>
               <ManageAssignments />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="syllabus-management"
+          element={
+            <RoleRoute roles={['teacher']}>
+              <SyllabusManagement />
             </RoleRoute>
           }
         />
