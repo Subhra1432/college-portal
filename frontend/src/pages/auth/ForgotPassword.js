@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+
 import { Link as RouterLink } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, useField } from 'formik';
 import * as Yup from 'yup';
-import { TextField } from 'formik-mui';
 import {
   Box,
   Button,
@@ -13,6 +13,7 @@ import {
   Paper,
   Alert,
   CircularProgress,
+  TextField,
 } from '@mui/material';
 import { LockReset as LockResetIcon } from '@mui/icons-material';
 
@@ -20,6 +21,25 @@ import { LockReset as LockResetIcon } from '@mui/icons-material';
 // For now we'll just create a placeholder function
 const resetPassword = (email) => {
   return { type: 'RESET_PASSWORD_REQUEST', payload: { email } };
+};
+
+// Custom text field component using Material UI with Formik
+const TextFieldWrapper = ({ name, ...otherProps }) => {
+  const [field, meta] = useField(name);
+  
+  const configTextField = {
+    ...field,
+    ...otherProps,
+    fullWidth: true,
+    variant: 'outlined',
+  };
+
+  if (meta && meta.touched && meta.error) {
+    configTextField.error = true;
+    configTextField.helperText = meta.error;
+  }
+
+  return <TextField {...configTextField} />;
 };
 
 const validationSchema = Yup.object({
@@ -93,13 +113,10 @@ const ForgotPassword = () => {
           >
             {({ isSubmitting }) => (
               <Form style={{ width: '100%' }}>
-                <Field
-                  component={TextField}
+                <TextFieldWrapper
                   name="email"
                   type="email"
                   label="Email Address"
-                  variant="outlined"
-                  fullWidth
                   margin="normal"
                   autoFocus
                 />
