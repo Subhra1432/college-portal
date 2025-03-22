@@ -22,12 +22,14 @@ import Payments from './pages/student/Payments';
 import Results from './pages/student/Results';
 import Assignments from './pages/student/Assignments';
 import Syllabus from './pages/student/Syllabus';
+import Courses from './pages/student/Courses';
 
 // Teacher pages
 import UploadAttendance from './pages/teacher/UploadAttendance';
 import UploadMarks from './pages/teacher/UploadMarks';
 import ManageAssignments from './pages/teacher/ManageAssignments';
 import SyllabusManagement from './pages/teacher/SyllabusManagement';
+import Students from './pages/teacher/Students';
 
 // Shared pages
 import Messages from './pages/messages/Messages';
@@ -143,6 +145,14 @@ const App = () => {
 
         {/* Student Routes */}
         <Route
+          path="courses"
+          element={
+            <RoleRoute roles={['student', 'teacher']}>
+              <Courses />
+            </RoleRoute>
+          }
+        />
+        <Route
           path="attendance"
           element={
             <RoleRoute roles={['student']}>
@@ -213,6 +223,14 @@ const App = () => {
           element={
             <RoleRoute roles={['teacher']}>
               <SyllabusManagement />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="students"
+          element={
+            <RoleRoute roles={['teacher']}>
+              <Students />
             </RoleRoute>
           }
         />

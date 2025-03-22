@@ -199,8 +199,8 @@ const MainLayout = ({ children }) => {
           <ListItem
             button
             key={item.text}
-            onClick={() => handleMenuClick(item.path)}
-            selected={location.pathname === item.path}
+            onClick={() => handleMenuClick(item.url)}
+            selected={location.pathname === item.url}
             sx={{
               py: 1.5,
               '&.Mui-selected': {
@@ -290,7 +290,7 @@ const MainLayout = ({ children }) => {
       id: 'student-courses',
       title: 'Courses',
       type: 'item',
-      url: '/courses',
+      url: '/dashboard/courses',
       icon: <MenuBookIcon />,
       text: 'Courses',
     },
@@ -298,7 +298,7 @@ const MainLayout = ({ children }) => {
       id: 'student-syllabus',
       title: 'Syllabus',
       type: 'item',
-      url: '/student/syllabus',
+      url: '/dashboard/syllabus',
       icon: <AssignmentIcon />,
       text: 'Syllabus',
     },
@@ -306,7 +306,7 @@ const MainLayout = ({ children }) => {
       id: 'student-assignments',
       title: 'Assignments',
       type: 'item',
-      url: '/assignments',
+      url: '/dashboard/assignments',
       icon: <AssignmentIcon />,
       text: 'Assignments',
     },
@@ -314,15 +314,15 @@ const MainLayout = ({ children }) => {
       id: 'student-grades',
       title: 'Grades',
       type: 'item',
-      url: '/grades',
+      url: '/dashboard/results',
       icon: <GradeIcon />,
-      text: 'Grades',
+      text: 'Results',
     },
     {
       id: 'student-attendance',
       title: 'Attendance',
       type: 'item',
-      url: '/attendance',
+      url: '/dashboard/attendance',
       icon: <EventAvailableIcon />,
       text: 'Attendance',
     },
@@ -342,7 +342,7 @@ const MainLayout = ({ children }) => {
       id: 'teacher-courses',
       title: 'Courses',
       type: 'item',
-      url: '/courses',
+      url: '/dashboard/courses',
       icon: <MenuBookIcon />,
       text: 'Courses',
     },
@@ -350,7 +350,7 @@ const MainLayout = ({ children }) => {
       id: 'teacher-syllabus',
       title: 'Syllabus Management',
       type: 'item',
-      url: '/teacher/syllabus-management',
+      url: '/dashboard/syllabus-management',
       icon: <AssignmentIcon />,
       text: 'Syllabus Management',
     },
@@ -358,7 +358,7 @@ const MainLayout = ({ children }) => {
       id: 'teacher-students',
       title: 'Students',
       type: 'item',
-      url: '/students',
+      url: '/dashboard/students',
       icon: <PeopleIcon />,
       text: 'Students',
     },
@@ -366,7 +366,7 @@ const MainLayout = ({ children }) => {
       id: 'teacher-assessments',
       title: 'Assessments',
       type: 'item',
-      url: '/assessments',
+      url: '/dashboard/upload-marks',
       icon: <AssessmentIcon />,
       text: 'Assessments',
     },
@@ -374,7 +374,7 @@ const MainLayout = ({ children }) => {
       id: 'teacher-attendance',
       title: 'Attendance',
       type: 'item',
-      url: '/attendance',
+      url: '/dashboard/upload-attendance',
       icon: <EventAvailableIcon />,
       text: 'Attendance',
     },
