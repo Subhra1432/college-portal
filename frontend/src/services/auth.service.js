@@ -104,6 +104,7 @@ const login = async (userData) => {
 const logout = () => {
   localStorage.removeItem('user');
   localStorage.removeItem('token');
+  localStorage.removeItem('isAuthenticated');
 };
 
 // Get current user

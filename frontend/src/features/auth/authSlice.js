@@ -138,6 +138,24 @@ export const authSlice = createSlice({
       // Check Auth
       .addCase(checkAuth.pending, (state) => {
         state.loading = true;
+        
+        // Immediately check localStorage for faster authentication
+        const localIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        if (localIsAuthenticated) {
+          console.log('checkAuth.pending: Found isAuthenticated=true in localStorage');
+          state.isAuthenticated = true;
+          
+          // Try to get user from localStorage
+          try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+              state.user = JSON.parse(storedUser);
+              console.log('checkAuth.pending: Using user from localStorage:', state.user);
+            }
+          } catch (e) {
+            console.error('Error parsing user from localStorage:', e);
+          }
+        }
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.loading = false;

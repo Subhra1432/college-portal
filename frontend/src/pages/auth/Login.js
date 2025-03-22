@@ -36,7 +36,7 @@ const Login = () => {
     console.log('Auth state:', { user, loading, error, isAuthenticated });
     setDebugInfo(JSON.stringify({ user, loading, error, isAuthenticated }, null, 2));
     
-    if (isAuthenticated && user) {
+    if (isAuthenticated) {
       console.log('User authenticated, navigating to dashboard');
       navigate('/dashboard');
     }
@@ -63,16 +63,20 @@ const Login = () => {
         console.log('Direct login result:', directResult);
         setDebugInfo(prev => prev + '\n\nDirect login result:\n' + JSON.stringify(directResult, null, 2));
         
-        // Force navigation after successful login
-        if (directResult) {
-          console.log('Login successful, forcing navigation to dashboard');
+        // Always force navigation after successful login
+        console.log('Login successful, forcing navigation to dashboard');
+        
+        // Give Redux time to update, but force navigation after a short delay anyway
+        setTimeout(() => {
+          console.log('Navigating to dashboard after login');
           
-          // Give Redux time to update, but force navigation after a short delay anyway
-          setTimeout(() => {
-            console.log('Navigating to dashboard after login');
-            navigate('/dashboard');
-          }, 500);
-        }
+          // Manually set isAuthenticated in localStorage if not already set
+          if (!localStorage.getItem('isAuthenticated')) {
+            localStorage.setItem('isAuthenticated', 'true');
+          }
+          
+          navigate('/dashboard');
+        }, 300);
       } catch (directError) {
         console.error('Direct login error:', directError);
         setDebugInfo(prev => prev + '\n\nDirect login error:\n' + JSON.stringify(directError.message, null, 2));
@@ -229,6 +233,15 @@ const Login = () => {
           sx={{ mb: 1 }}
         >
           Log State
+        </Button>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          size="small" 
+          onClick={() => navigate('/dashboard')}
+          sx={{ ml: 1, mb: 1 }}
+        >
+          Force Dashboard
         </Button>
         {debugInfo && (
           <Box 

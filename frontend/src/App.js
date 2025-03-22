@@ -55,7 +55,10 @@ const App = () => {
       return <div>Loading...</div>;
     }
     
-    if (!isAuthenticated) {
+    // Check localStorage first for immediate access
+    const localIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    
+    if (!isAuthenticated && !localIsAuthenticated) {
       console.log('ProtectedRoute: Not authenticated, redirecting to login');
       return <Navigate to="/login" />;
     }
@@ -73,14 +76,38 @@ const App = () => {
       return <div>Loading...</div>;
     }
     
-    if (!isAuthenticated) {
+    // Check localStorage first for immediate access
+    const localIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    
+    // Get user from localStorage if Redux state doesn't have it
+    let currentUser = user;
+    if (!currentUser) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          currentUser = JSON.parse(storedUser);
+          console.log('RoleRoute: Using user from localStorage:', currentUser);
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e);
+        }
+      }
+    }
+    
+    if (!isAuthenticated && !localIsAuthenticated) {
       console.log('RoleRoute: Not authenticated, redirecting to login');
       return <Navigate to="/login" />;
     }
 
-    if (!roles.includes(user?.role)) {
-      console.log('RoleRoute: User does not have required role, redirecting to dashboard');
+    if (currentUser && !roles.includes(currentUser.role)) {
+      console.log(`RoleRoute: User role (${currentUser.role}) does not match required roles (${roles.join(', ')}), redirecting to dashboard`);
       return <Navigate to="/dashboard" />;
+    }
+    
+    // If we don't have the user yet but we're authenticated, just render the children
+    // This allows routing to work while user data is being loaded
+    if (!currentUser && (isAuthenticated || localIsAuthenticated)) {
+      console.log('RoleRoute: Authenticated but no user data yet, rendering children anyway');
+      return children;
     }
 
     console.log('RoleRoute: User has required role, rendering children');
