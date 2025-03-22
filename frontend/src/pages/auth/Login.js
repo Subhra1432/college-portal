@@ -16,12 +16,15 @@ import {
   OutlinedInput,
   Stack,
   Typography,
+  Divider,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { login, reset } from '../../features/auth/authSlice';
+import AuthService from '../../services/auth.service';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [debugInfo, setDebugInfo] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -30,14 +33,18 @@ const Login = () => {
   );
 
   useEffect(() => {
+    console.log('Auth state:', { user, loading, error, isAuthenticated });
+    setDebugInfo(JSON.stringify({ user, loading, error, isAuthenticated }, null, 2));
+    
     if (isAuthenticated && user) {
+      console.log('User authenticated, navigating to dashboard');
       navigate('/dashboard');
     }
 
     return () => {
       dispatch(reset());
     };
-  }, [user, isAuthenticated, navigate, dispatch]);
+  }, [user, isAuthenticated, navigate, dispatch, error, loading]);
 
   const formik = useFormik({
     initialValues: {
@@ -48,7 +55,19 @@ const Login = () => {
       identifier: Yup.string().required('Email or Registration Number is required'),
       password: Yup.string().required('Password is required'),
     }),
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
+      console.log('Login attempt with:', values);
+      try {
+        // Try the direct service method first to debug
+        const directResult = await AuthService.login(values);
+        console.log('Direct login result:', directResult);
+        setDebugInfo(prev => prev + '\n\nDirect login result:\n' + JSON.stringify(directResult, null, 2));
+      } catch (directError) {
+        console.error('Direct login error:', directError);
+        setDebugInfo(prev => prev + '\n\nDirect login error:\n' + JSON.stringify(directError.message, null, 2));
+      }
+      
+      // Then try through Redux
       dispatch(login(values));
     },
   });
@@ -59,6 +78,14 @@ const Login = () => {
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+
+  const testMockCredentials = () => {
+    console.log('Testing mock credentials');
+    formik.setValues({
+      identifier: 'student@college.edu',
+      password: 'student123',
+    });
   };
 
   return (
@@ -167,8 +194,54 @@ const Login = () => {
           Create an account
         </Link>
       </Stack>
+      
+      {/* Debug Section */}
+      <Divider sx={{ my: 3 }} />
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+          Debug Tools
+        </Typography>
+        <Button 
+          variant="outlined" 
+          color="secondary" 
+          size="small" 
+          onClick={testMockCredentials}
+          sx={{ mr: 1, mb: 1 }}
+        >
+          Fill Student Credentials
+        </Button>
+        <Button 
+          variant="outlined" 
+          color="info" 
+          size="small" 
+          onClick={() => console.log('Current state:', { auth: { user, loading, error, isAuthenticated }, formik: formik.values })}
+          sx={{ mb: 1 }}
+        >
+          Log State
+        </Button>
+        {debugInfo && (
+          <Box 
+            sx={{ 
+              mt: 2, 
+              p: 2, 
+              bgcolor: 'background.paper', 
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'divider',
+              maxHeight: '200px',
+              overflow: 'auto',
+              '& pre': {
+                margin: 0,
+                fontSize: '0.75rem'
+              }
+            }}
+          >
+            <pre>{debugInfo}</pre>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
 
-export default Login; 
+export default Login;
