@@ -131,6 +131,43 @@ const MainLayout = ({ children }) => {
     }
   };
   
+  // Function to determine page title based on path and role
+  const getPageTitle = (pathname, role) => {
+    // Default title
+    let title = 'College Portal';
+    
+    // Extract the main path segment (e.g., /dashboard/profile -> profile)
+    const path = pathname.split('/').filter(p => p)[0];
+    
+    switch (path) {
+      case 'dashboard':
+        title = role === 'student' ? 'Student Dashboard' : role === 'teacher' ? 'Teacher Dashboard' : 'Admin Dashboard';
+        break;
+      case 'profile':
+        title = 'User Profile';
+        break;
+      case 'messages':
+        title = 'Messages';
+        break;
+      case 'notices':
+        title = 'Notices & Announcements';
+        break;
+      case 'calendar':
+        title = 'Academic Calendar';
+        break;
+      case 'student':
+        title = 'Student Syllabus';
+        break;
+      case 'teacher':
+        title = 'Syllabus Management';
+        break;
+      default:
+        title = 'College Portal';
+    }
+    
+    return title;
+  };
+  
   const renderSidebar = () => {
     return (
       <List component="nav">

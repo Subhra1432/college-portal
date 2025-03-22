@@ -22,6 +22,44 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { login, reset } from '../../features/auth/authSlice';
 import AuthService from '../../services/auth.service';
 
+// Mock user data for testing
+const MOCK_USERS = [
+  {
+    id: '1',
+    name: 'Admin User',
+    email: 'admin@college.edu',
+    password: 'admin123',
+    role: 'admin',
+    token: 'admin-token-123',
+    department: 'Administration',
+    profilePicture: '',
+  },
+  {
+    id: '2',
+    name: 'Teacher User',
+    email: 'teacher@college.edu',
+    password: 'teacher123',
+    role: 'teacher',
+    token: 'teacher-token-123',
+    department: 'Computer Science',
+    profilePicture: '',
+  },
+  {
+    id: '3',
+    name: 'Student User',
+    email: 'student@college.edu',
+    password: 'student123',
+    role: 'student',
+    token: 'student-token-123',
+    department: 'Computer Science',
+    registrationNumber: 'CS2023001',
+    semester: '3rd',
+    program: 'B.Tech',
+    section: 'A',
+    profilePicture: '',
+  },
+];
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [debugInfo, setDebugInfo] = useState('');
