@@ -2,6 +2,40 @@ import axios from 'axios';
 
 const API_URL = '/api/auth';
 
+// Mock user database
+const MOCK_USERS = [
+  {
+    _id: 'admin123',
+    email: 'admin@college.edu',
+    password: 'admin123',
+    name: 'Admin User',
+    registrationNumber: 'ADM2023001',
+    role: 'admin',
+    department: 'Administration',
+    token: 'mock-jwt-token-admin'
+  },
+  {
+    _id: 'teacher123',
+    email: 'teacher@college.edu',
+    password: 'teacher123',
+    name: 'John Smith',
+    registrationNumber: 'TCH2023001',
+    role: 'teacher',
+    department: 'Computer Science',
+    token: 'mock-jwt-token-teacher'
+  },
+  {
+    _id: 'student123',
+    email: 'student@college.edu',
+    password: 'student123',
+    name: 'Jane Doe',
+    registrationNumber: 'CS2023001',
+    role: 'student',
+    department: 'Computer Science',
+    token: 'mock-jwt-token-student'
+  }
+];
+
 // Register user
 const register = async (userData) => {
   const response = await axios.post(`${API_URL}/register`, userData);
@@ -28,21 +62,25 @@ const login = async (userData) => {
     return response.data.data;
   } catch (error) {
     console.log('Backend connection failed, using mock data for testing');
-    // If backend connection fails, use mock data for testing
-    const mockUser = {
-      _id: '1234567890',
-      name: 'Test User',
-      email: userData.identifier.includes('@') ? userData.identifier : 'testuser@example.com',
-      registrationNumber: userData.identifier.includes('@') ? 'REG12345' : userData.identifier,
-      role: 'student',
-      department: 'Computer Science',
-      token: 'mock-jwt-token',
-    };
     
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    localStorage.setItem('token', mockUser.token);
+    // Check if the user exists in our mock database
+    const foundUser = MOCK_USERS.find(user => 
+      (user.email === userData.identifier || user.registrationNumber === userData.identifier) && 
+      user.password === userData.password
+    );
     
-    return mockUser;
+    if (foundUser) {
+      // Create a copy without the password field for security
+      const { password, ...userWithoutPassword } = foundUser;
+      
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      localStorage.setItem('token', userWithoutPassword.token);
+      
+      return userWithoutPassword;
+    } else {
+      // If credentials don't match, reject with an error
+      throw new Error('Invalid email/registration number or password');
+    }
   }
 };
 
