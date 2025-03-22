@@ -5,10 +5,13 @@ import AuthService from '../../services/auth.service';
 // Check if user is already authenticated
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, thunkAPI) => {
   try {
+    console.log('checkAuth thunk: Checking if user is authenticated');
     const user = await AuthService.getCurrentUser();
+    console.log('checkAuth thunk: User authenticated:', user);
     return user;
   } catch (error) {
-    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to authenticate');
+    console.log('checkAuth thunk: Authentication failed:', error.message);
+    return thunkAPI.rejectWithValue(error.message || 'Failed to authenticate');
   }
 });
 
@@ -21,7 +24,7 @@ export const register = createAsyncThunk(
       toast.success('Registration successful!');
       return response;
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
+      const message = error.response?.data?.message || error.message || 'Registration failed';
       toast.error(message);
       return thunkAPI.rejectWithValue(message);
     }
@@ -31,10 +34,19 @@ export const register = createAsyncThunk(
 // Login a user
 export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
   try {
+    console.log('login thunk: Attempting to login user');
     const response = await AuthService.login(userData);
+    console.log('login thunk: Login successful:', response);
+    toast.success('Login successful!');
     return response;
   } catch (error) {
-    const message = error.response?.data?.message || 'Login failed';
+    console.log('login thunk: Login failed:', error);
+    // Properly extract error message from various error formats
+    const message = 
+      error.response?.data?.message || 
+      error.message || 
+      'Login failed';
+    console.log('login thunk: Error message:', message);
     toast.error(message);
     return thunkAPI.rejectWithValue(message);
   }
@@ -43,6 +55,7 @@ export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) =
 // Logout a user
 export const logout = createAsyncThunk('auth/logout', async () => {
   await AuthService.logout();
+  toast.info('You have been logged out');
 });
 
 // Update user profile
@@ -54,7 +67,7 @@ export const updateProfile = createAsyncThunk(
       toast.success('Profile updated successfully!');
       return response;
     } catch (error) {
-      const message = error.response?.data?.message || 'Failed to update profile';
+      const message = error.response?.data?.message || error.message || 'Failed to update profile';
       toast.error(message);
       return thunkAPI.rejectWithValue(message);
     }
@@ -70,7 +83,7 @@ export const changePassword = createAsyncThunk(
       toast.success('Password changed successfully!');
       return response;
     } catch (error) {
-      const message = error.response?.data?.message || 'Failed to change password';
+      const message = error.response?.data?.message || error.message || 'Failed to change password';
       toast.error(message);
       return thunkAPI.rejectWithValue(message);
     }
@@ -124,15 +137,20 @@ export const authSlice = createSlice({
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
+        state.error = null;
+        console.log('Redux state - login.pending:', { ...state });
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
+        state.error = null;
+        console.log('Redux state - login.fulfilled:', { ...state, user: action.payload });
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        console.log('Redux state - login.rejected:', { ...state, error: action.payload });
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {
