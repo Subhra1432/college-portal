@@ -1,0 +1,4 @@
+Follow these steps to deploy the application:
+1. Set up MongoDB Atlas database
+2. Deploy backend to Render.com
+3. Deploy frontend to Render.com
