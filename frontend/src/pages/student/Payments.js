@@ -35,6 +35,14 @@ import {
   FormControlLabel,
   Alert,
   IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  CircularProgress,
+  Tabs,
+  Tab,
+  InputAdornment,
 } from '@mui/material';
 import {
   Payment as PaymentIcon,
@@ -45,553 +53,874 @@ import {
   CheckCircle as CheckCircleIcon,
   Close as CloseIcon,
   DownloadForOffline as DownloadIcon,
+  LocalAtm as LocalAtmIcon,
+  History as HistoryIcon,
+  Print as PrintIcon,
+  FilterList as FilterListIcon,
+  Search as SearchIcon,
 } from '@mui/icons-material';
 
-// Dummy payment data
-const DUMMY_PAYMENTS = [
-  {
-    id: 'INV-2023-001',
-    type: 'Tuition Fee',
-    academicYear: '2022-2023',
-    semester: 'Spring',
-    amount: 45000,
-    dueDate: '2023-01-15',
-    status: 'paid',
-    paymentDate: '2023-01-10',
-    paymentMethod: 'Credit Card',
-    transactionId: 'TXN12345678',
+// Mock payment data
+const MOCK_PAYMENT_DATA = {
+  student: {
+    id: 'STU123456',
+    name: 'John Smith',
+    program: 'B.Tech',
+    batch: '2022-2026',
+    semester: 'Semester 3',
   },
-  {
-    id: 'INV-2023-002',
-    type: 'Hostel Fee',
-    academicYear: '2022-2023',
-    semester: 'Spring',
-    amount: 25000,
-    dueDate: '2023-01-15',
-    status: 'paid',
-    paymentDate: '2023-01-10',
-    paymentMethod: 'Net Banking',
-    transactionId: 'TXN87654321',
+  fees: {
+    tuitionFee: 45000,
+    developmentFee: 15000,
+    libraryFee: 5000,
+    examFee: 2500,
+    miscFee: 2500,
+    totalDue: 70000,
+    paid: 35000,
+    balance: 35000,
+    dueDate: '2023-11-15',
   },
-  {
-    id: 'INV-2023-003',
-    type: 'Library Fee',
-    academicYear: '2022-2023',
-    semester: 'Spring',
-    amount: 5000,
-    dueDate: '2023-01-31',
-    status: 'paid',
-    paymentDate: '2023-01-25',
-    paymentMethod: 'UPI',
-    transactionId: 'TXN98765432',
-  },
-  {
-    id: 'INV-2023-004',
-    type: 'Examination Fee',
-    academicYear: '2022-2023',
-    semester: 'Spring',
-    amount: 8000,
-    dueDate: '2023-03-31',
-    status: 'pending',
-    paymentDate: null,
-    paymentMethod: null,
-    transactionId: null,
-  },
-  {
-    id: 'INV-2023-005',
-    type: 'Development Fee',
-    academicYear: '2022-2023',
-    semester: 'Spring',
-    amount: 10000,
-    dueDate: '2023-04-15',
-    status: 'pending',
-    paymentDate: null,
-    paymentMethod: null,
-    transactionId: null,
-  },
-];
+  paymentHistory: [
+    {
+      id: 'PAY10001',
+      date: '2023-07-25',
+      amount: 35000,
+      mode: 'Online Banking',
+      reference: 'REF78923451',
+      status: 'Success',
+      description: 'First installment payment for Semester 3',
+      receiptUrl: '#',
+    },
+    {
+      id: 'PAY10000',
+      date: '2023-02-15',
+      amount: 70000,
+      mode: 'Credit Card',
+      reference: 'REF45678901',
+      status: 'Success',
+      description: 'Full payment for Semester 2',
+      receiptUrl: '#',
+    },
+    {
+      id: 'PAY9999',
+      date: '2022-08-10',
+      amount: 70000,
+      mode: 'Bank Transfer',
+      reference: 'REF12345678',
+      status: 'Success',
+      description: 'Full payment for Semester 1',
+      receiptUrl: '#',
+    },
+  ],
+  upcomingPayments: [
+    {
+      id: 'UP1001',
+      dueDate: '2023-11-15',
+      amount: 35000,
+      description: 'Second installment payment for Semester 3',
+      status: 'Pending',
+    },
+    {
+      id: 'UP1002',
+      dueDate: '2024-01-15',
+      amount: 70000,
+      description: 'Full payment for Semester 4',
+      status: 'Not due',
+    },
+  ],
+};
 
 const Payments = () => {
   const { user } = useSelector((state) => state.auth);
-  const [selectedPayment, setSelectedPayment] = useState(null);
-  const [openPayDialog, setOpenPayDialog] = useState(false);
-  const [openReceiptDialog, setOpenReceiptDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('creditCard');
+  const [paymentAmount, setPaymentAmount] = useState(MOCK_PAYMENT_DATA.fees.balance);
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: '',
+    nameOnCard: '',
+    expiryDate: '',
+    cvv: '',
+  });
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
   
-  // Calculate total paid and pending amounts
-  const calculateAmounts = () => {
-    let paid = 0;
-    let pending = 0;
-    
-    DUMMY_PAYMENTS.forEach(payment => {
-      if (payment.status === 'paid') {
-        paid += payment.amount;
-      } else {
-        pending += payment.amount;
-      }
-    });
-    
-    return { paid, pending };
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
   };
   
-  const { paid, pending } = calculateAmounts();
-  
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const handlePayNowClick = () => {
+    setPaymentDialogOpen(true);
   };
   
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
-  
-  // Handle payment click
-  const handlePaymentClick = (payment) => {
-    setSelectedPayment(payment);
-    setOpenPayDialog(true);
-    setActiveStep(0);
-    setPaymentMethod('');
-    setPaymentSuccess(false);
-  };
-  
-  // Handle receipt click
-  const handleReceiptClick = (payment) => {
-    setSelectedPayment(payment);
-    setOpenReceiptDialog(true);
-  };
-  
-  // Handle payment dialog close
-  const handlePayDialogClose = () => {
-    setOpenPayDialog(false);
-    setSelectedPayment(null);
-  };
-  
-  // Handle receipt dialog close
-  const handleReceiptDialogClose = () => {
-    setOpenReceiptDialog(false);
-    setSelectedPayment(null);
-  };
-  
-  // Handle next step in payment process
-  const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-    if (activeStep === 1) {
-      // Simulate payment processing
-      setTimeout(() => {
-        setPaymentSuccess(true);
-      }, 1500);
+  const handlePaymentDialogClose = () => {
+    if (!paymentProcessing) {
+      setPaymentDialogOpen(false);
+      setActiveStep(0);
+      setPaymentMethod('creditCard');
+      setPaymentSuccess(false);
     }
   };
   
-  // Handle back step in payment process
-  const handleBack = () => {
+  const handleNextStep = () => {
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+  
+  const handleBackStep = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
   
-  // Payment steps
-  const steps = ['Select Payment Method', 'Enter Details', 'Confirmation'];
-  
-  // Render payment form based on active step
-  const renderPaymentForm = () => {
-    switch (activeStep) {
-      case 0:
-        return (
-          <Box sx={{ mt: 2 }}>
-            <FormControl component="fieldset">
-              <RadioGroup
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              >
-                <FormControlLabel 
-                  value="creditCard" 
-                  control={<Radio />} 
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CreditCardIcon sx={{ mr: 1 }} />
-                      <Typography>Credit/Debit Card</Typography>
-                    </Box>
-                  } 
-                />
-                <FormControlLabel 
-                  value="netBanking" 
-                  control={<Radio />} 
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <AccountBalanceIcon sx={{ mr: 1 }} />
-                      <Typography>Net Banking</Typography>
-                    </Box>
-                  } 
-                />
-                <FormControlLabel 
-                  value="upi" 
-                  control={<Radio />} 
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <AttachMoneyIcon sx={{ mr: 1 }} />
-                      <Typography>UPI Payment</Typography>
-                    </Box>
-                  } 
-                />
-              </RadioGroup>
-            </FormControl>
-          </Box>
-        );
-      
-      case 1:
-        if (paymentMethod === 'creditCard') {
-          return (
-            <Box sx={{ mt: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Card Number"
-                    variant="outlined"
-                    fullWidth
-                    placeholder="1234 5678 9012 3456"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Expiry Date"
-                    variant="outlined"
-                    fullWidth
-                    placeholder="MM/YY"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="CVV"
-                    variant="outlined"
-                    fullWidth
-                    placeholder="123"
-                    type="password"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Cardholder Name"
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          );
-        } else if (paymentMethod === 'netBanking') {
-          return (
-            <Box sx={{ mt: 2 }}>
-              <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                <InputLabel>Select Bank</InputLabel>
-                <Select
-                  label="Select Bank"
-                >
-                  <MenuItem value="sbi">State Bank of India</MenuItem>
-                  <MenuItem value="hdfc">HDFC Bank</MenuItem>
-                  <MenuItem value="icici">ICICI Bank</MenuItem>
-                  <MenuItem value="axis">Axis Bank</MenuItem>
-                  <MenuItem value="pnb">Punjab National Bank</MenuItem>
-                </Select>
-              </FormControl>
-              <Alert severity="info">
-                You will be redirected to your bank's website to complete the payment.
-              </Alert>
-            </Box>
-          );
-        } else if (paymentMethod === 'upi') {
-          return (
-            <Box sx={{ mt: 2 }}>
-              <TextField
-                label="UPI ID"
-                variant="outlined"
-                fullWidth
-                placeholder="your-upi-id@bank"
-                sx={{ mb: 2 }}
-              />
-              <Alert severity="info">
-                A payment request will be sent to your UPI app.
-              </Alert>
-            </Box>
-          );
-        }
-        return null;
-      
-      case 2:
-        return (
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            {paymentSuccess ? (
-              <>
-                <CheckCircleIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Payment Successful!
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Your payment of {formatCurrency(selectedPayment?.amount)} for {selectedPayment?.type} has been processed successfully.
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Transaction ID: TXN{Math.floor(Math.random() * 10000000)}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<ReceiptIcon />}
-                  sx={{ mt: 2 }}
-                >
-                  Download Receipt
-                </Button>
-              </>
-            ) : (
-              <>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Box sx={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #f3f3f3', borderTop: '3px solid #3f51b5', animation: 'spin 1s linear infinite' }} />
-                </Box>
-                <Typography variant="h6" sx={{ mt: 2 }}>
-                  Processing Payment...
-                </Typography>
-                <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                  Please do not close this window.
-                </Typography>
-              </>
-            )}
-          </Box>
-        );
-      
-      default:
-        return null;
-    }
+  const handlePaymentMethodChange = (event) => {
+    setPaymentMethod(event.target.value);
   };
+  
+  const handleCardDetailsChange = (event) => {
+    const { name, value } = event.target;
+    setCardDetails({
+      ...cardDetails,
+      [name]: value,
+    });
+  };
+  
+  const handlePaymentSubmit = () => {
+    setPaymentProcessing(true);
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      setPaymentProcessing(false);
+      setPaymentSuccess(true);
+      setActiveStep(3);
+    }, 2000);
+  };
+  
+  const handleViewReceipt = (receipt) => {
+    setSelectedReceipt(receipt);
+    setReceiptDialogOpen(true);
+  };
+  
+  const handleCloseReceiptDialog = () => {
+    setReceiptDialogOpen(false);
+  };
+  
+  const getDaysUntilDue = (dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+  
+  const formatCurrency = (amount) => {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
+  
+  // Filter payment history based on search term and status filter
+  const filteredPaymentHistory = MOCK_PAYMENT_DATA.paymentHistory.filter(payment => {
+    const matchesSearch = 
+      payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = filterStatus === 'all' || payment.status.toLowerCase() === filterStatus.toLowerCase();
+    
+    return matchesSearch && matchesStatus;
+  });
+  
+  // Payment steps
+  const steps = ['Select amount', 'Choose payment method', 'Make payment', 'Confirmation'];
   
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Fees & Payments
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <PaymentIcon sx={{ fontSize: 30, mr: 1, color: 'primary.main' }} />
+            <Typography variant="h4" component="h1">
+              Payments
+            </Typography>
+          </Box>
         </Grid>
         
-        {/* Payment Summary Cards */}
-        <Grid item xs={12}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <AttachMoneyIcon color="primary" sx={{ mr: 1, fontSize: 28 }} />
-                    <Typography variant="h6">
-                      Total Paid
-                    </Typography>
-                  </Box>
-                  <Typography variant="h4" color="primary">
-                    {formatCurrency(paid)}
+        {/* Fee Summary */}
+        <Grid item xs={12} md={8}>
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              p: 3, 
+              background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
+              color: 'white',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography variant="h6" gutterBottom>
+                Fee Summary: {MOCK_PAYMENT_DATA.student.semester}
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Due Date: {formatDate(MOCK_PAYMENT_DATA.fees.dueDate)} ({getDaysUntilDue(MOCK_PAYMENT_DATA.fees.dueDate)} days remaining)
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <Typography variant="overline" sx={{ opacity: 0.8 }}>
+                    Total Fee
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                  <Typography variant="h5">
+                    {formatCurrency(MOCK_PAYMENT_DATA.fees.totalDue)}
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="overline" sx={{ opacity: 0.8 }}>
+                    Paid Amount
+                  </Typography>
+                  <Typography variant="h5">
+                    {formatCurrency(MOCK_PAYMENT_DATA.fees.paid)}
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="overline" sx={{ opacity: 0.8 }}>
+                    Balance Due
+                  </Typography>
+                  <Typography variant="h5">
+                    {formatCurrency(MOCK_PAYMENT_DATA.fees.balance)}
+                  </Typography>
+                </Grid>
+              </Grid>
+              
+              <Box sx={{ mt: 2 }}>
+                <Button 
+                  variant="contained" 
+                  color="secondary" 
+                  startIcon={<AttachMoneyIcon />}
+                  onClick={handlePayNowClick}
+                  disabled={MOCK_PAYMENT_DATA.fees.balance === 0}
+                  sx={{ mr: 2 }}
+                >
+                  Pay Now
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="inherit" 
+                  startIcon={<ReceiptIcon />}
+                  sx={{ borderColor: 'rgba(255, 255, 255, 0.5)', '&:hover': { borderColor: 'white' } }}
+                >
+                  Download Statement
+                </Button>
+              </Box>
+            </Box>
             
-            <Grid item xs={12} md={4}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <PaymentIcon color="error" sx={{ mr: 1, fontSize: 28 }} />
-                    <Typography variant="h6">
-                      Pending Payments
-                    </Typography>
-                  </Box>
-                  <Typography variant="h4" color="error">
-                    {formatCurrency(pending)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ReceiptIcon color="success" sx={{ mr: 1, fontSize: 28 }} />
-                    <Typography variant="h6">
-                      Recent Payments
-                    </Typography>
-                  </Box>
-                  <Typography variant="body1">
-                    {DUMMY_PAYMENTS.filter(payment => payment.status === 'paid').length} payment(s) in this semester
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+            <Box 
+              sx={{ 
+                position: 'absolute',
+                top: -15,
+                right: -15,
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '50%',
+                width: 200,
+                height: 200,
+              }} 
+            />
+            <Box 
+              sx={{ 
+                position: 'absolute',
+                bottom: -30,
+                left: -30,
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '50%',
+                width: 150,
+                height: 150,
+              }} 
+            />
+          </Paper>
         </Grid>
         
-        {/* Payment History */}
+        {/* Payment Method Card */}
+        <Grid item xs={12} md={4}>
+          <Card 
+            elevation={3} 
+            sx={{ 
+              height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column',
+            }}
+          >
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Typography variant="h6" gutterBottom color="primary">
+                Payment Methods
+              </Typography>
+              <List>
+                <ListItem>
+                  <ListItemIcon>
+                    <CreditCardIcon color="secondary" />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Credit/Debit Card" 
+                    secondary="Pay using VISA, Mastercard, RuPay"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <AccountBalanceIcon color="secondary" />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="NetBanking" 
+                    secondary="Pay through your bank account"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <LocalAtmIcon color="secondary" />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="UPI Payment" 
+                    secondary="Google Pay, PhonePe, Paytm"
+                  />
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        {/* Fee Breakdown */}
         <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Payment History
+              Fee Breakdown
             </Typography>
-            
-            <Divider sx={{ mb: 3 }} />
-            
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell><Typography variant="subtitle2">Invoice ID</Typography></TableCell>
-                    <TableCell><Typography variant="subtitle2">Description</Typography></TableCell>
-                    <TableCell><Typography variant="subtitle2">Due Date</Typography></TableCell>
-                    <TableCell><Typography variant="subtitle2">Amount</Typography></TableCell>
-                    <TableCell><Typography variant="subtitle2">Status</Typography></TableCell>
-                    <TableCell><Typography variant="subtitle2">Actions</Typography></TableCell>
+                    <TableCell>Fee Component</TableCell>
+                    <TableCell align="right">Amount</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {DUMMY_PAYMENTS.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{payment.id}</TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{payment.type}</Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          {payment.academicYear}, {payment.semester} Semester
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{formatDate(payment.dueDate)}</TableCell>
-                      <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={payment.status === 'paid' ? 'Paid' : 'Pending'}
-                          color={payment.status === 'paid' ? 'success' : 'warning'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {payment.status === 'paid' ? (
-                          <Button
-                            startIcon={<ReceiptIcon />}
-                            size="small"
-                            onClick={() => handleReceiptClick(payment)}
-                          >
-                            Receipt
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<PaymentIcon />}
-                            size="small"
-                            onClick={() => handlePaymentClick(payment)}
-                          >
-                            Pay Now
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  <TableRow>
+                    <TableCell>Tuition Fee</TableCell>
+                    <TableCell align="right">{formatCurrency(MOCK_PAYMENT_DATA.fees.tuitionFee)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Development Fee</TableCell>
+                    <TableCell align="right">{formatCurrency(MOCK_PAYMENT_DATA.fees.developmentFee)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Library Fee</TableCell>
+                    <TableCell align="right">{formatCurrency(MOCK_PAYMENT_DATA.fees.libraryFee)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Examination Fee</TableCell>
+                    <TableCell align="right">{formatCurrency(MOCK_PAYMENT_DATA.fees.examFee)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Miscellaneous Fee</TableCell>
+                    <TableCell align="right">{formatCurrency(MOCK_PAYMENT_DATA.fees.miscFee)}</TableCell>
+                  </TableRow>
+                  <TableRow sx={{ '& td': { fontWeight: 'bold' } }}>
+                    <TableCell>Total</TableCell>
+                    <TableCell align="right">{formatCurrency(MOCK_PAYMENT_DATA.fees.totalDue)}</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
+          </Paper>
+        </Grid>
+        
+        {/* Tabs for Payment History and Upcoming Payments */}
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+              <Tab label="Payment History" icon={<HistoryIcon />} iconPosition="start" />
+              <Tab label="Upcoming Payments" icon={<LocalAtmIcon />} iconPosition="start" />
+            </Tabs>
+            
+            {activeTab === 0 && (
+              <>
+                <Box sx={{ display: 'flex', mb: 3, gap: 2 }}>
+                  <TextField
+                    placeholder="Search payments..."
+                    size="small"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ flexGrow: 1 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  
+                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      label="Status"
+                    >
+                      <MenuItem value="all">All Status</MenuItem>
+                      <MenuItem value="success">Success</MenuItem>
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="failed">Failed</MenuItem>
+                    </Select>
+                  </FormControl>
+                  
+                  <IconButton color="primary" title="Print History">
+                    <PrintIcon />
+                  </IconButton>
+                  <IconButton color="primary" title="Download History">
+                    <DownloadIcon />
+                  </IconButton>
+                </Box>
+                
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Payment ID</TableCell>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Mode</TableCell>
+                        <TableCell align="right">Amount</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredPaymentHistory.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{payment.id}</TableCell>
+                          <TableCell>{formatDate(payment.date)}</TableCell>
+                          <TableCell>{payment.description}</TableCell>
+                          <TableCell>{payment.mode}</TableCell>
+                          <TableCell align="right">{formatCurrency(payment.amount)}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={payment.status}
+                              color={payment.status === 'Success' ? 'success' : payment.status === 'Pending' ? 'warning' : 'error'}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="small"
+                              startIcon={<ReceiptIcon />}
+                              onClick={() => handleViewReceipt(payment)}
+                            >
+                              Receipt
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                
+                {filteredPaymentHistory.length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 3 }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      No payment records found matching your criteria
+                    </Typography>
+                  </Box>
+                )}
+              </>
+            )}
+            
+            {activeTab === 1 && (
+              <>
+                <Typography variant="subtitle1" paragraph>
+                  Your upcoming payment schedule is shown below. Please ensure timely payments to avoid late fees.
+                </Typography>
+                
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Due Date</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell align="right">Amount</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {MOCK_PAYMENT_DATA.upcomingPayments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{formatDate(payment.dueDate)}</TableCell>
+                          <TableCell>{payment.description}</TableCell>
+                          <TableCell align="right">{formatCurrency(payment.amount)}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={payment.status}
+                              color={payment.status === 'Pending' ? 'warning' : 'default'}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={handlePayNowClick}
+                              disabled={payment.status === 'Not due'}
+                            >
+                              Pay Now
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            )}
           </Paper>
         </Grid>
       </Grid>
       
       {/* Payment Dialog */}
       <Dialog
-        open={openPayDialog}
-        onClose={handlePayDialogClose}
+        open={paymentDialogOpen}
+        onClose={handlePaymentDialogClose}
         maxWidth="sm"
         fullWidth
       >
         <DialogTitle>
-          Make Payment
-          <IconButton
-            aria-label="close"
-            onClick={handlePayDialogClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
+          Make a Payment
         </DialogTitle>
         <DialogContent dividers>
-          {selectedPayment && (
-            <>
-              <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Fee Type
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.type}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Academic Year
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.academicYear}, {selectedPayment.semester}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Due Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(selectedPayment.dueDate)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Amount
-                  </Typography>
-                  <Typography variant="body1" fontWeight="bold">
-                    {formatCurrency(selectedPayment.amount)}
-                  </Typography>
-                </Grid>
-              </Grid>
+          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          
+          {activeStep === 0 && (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Payment Amount
+              </Typography>
+              <Typography variant="body2" paragraph color="text.secondary">
+                Enter the amount you wish to pay. The current balance due is {formatCurrency(MOCK_PAYMENT_DATA.fees.balance)}.
+              </Typography>
               
-              <Divider sx={{ my: 2 }} />
+              <TextField
+                label="Amount"
+                type="number"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                }}
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                helperText={`Maximum amount: ${formatCurrency(MOCK_PAYMENT_DATA.fees.balance)}`}
+              />
               
-              <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
-                {steps.map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
+              {paymentAmount > MOCK_PAYMENT_DATA.fees.balance && (
+                <Alert severity="error" sx={{ mt: 2 }}>
+                  Amount cannot exceed balance due
+                </Alert>
+              )}
               
-              {renderPaymentForm()}
-            </>
+              {paymentAmount <= 0 && (
+                <Alert severity="error" sx={{ mt: 2 }}>
+                  Amount must be greater than zero
+                </Alert>
+              )}
+            </Box>
+          )}
+          
+          {activeStep === 1 && (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Select Payment Method
+              </Typography>
+              
+              <FormControl component="fieldset" sx={{ mt: 2 }}>
+                <RadioGroup
+                  value={paymentMethod}
+                  onChange={handlePaymentMethodChange}
+                >
+                  <FormControlLabel 
+                    value="creditCard" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CreditCardIcon sx={{ mr: 1 }} />
+                        <span>Credit/Debit Card</span>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel 
+                    value="netBanking" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <AccountBalanceIcon sx={{ mr: 1 }} />
+                        <span>Net Banking</span>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel 
+                    value="upi" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <LocalAtmIcon sx={{ mr: 1 }} />
+                        <span>UPI Payment</span>
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Box>
+          )}
+          
+          {activeStep === 2 && (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                {paymentMethod === 'creditCard' && 'Credit/Debit Card Details'}
+                {paymentMethod === 'netBanking' && 'Net Banking Details'}
+                {paymentMethod === 'upi' && 'UPI Payment Details'}
+              </Typography>
+              
+              {paymentMethod === 'creditCard' && (
+                <>
+                  <TextField
+                    label="Card Number"
+                    name="cardNumber"
+                    value={cardDetails.cardNumber}
+                    onChange={handleCardDetailsChange}
+                    fullWidth
+                    margin="normal"
+                    placeholder="1234 5678 9012 3456"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CreditCardIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    label="Name on Card"
+                    name="nameOnCard"
+                    value={cardDetails.nameOnCard}
+                    onChange={handleCardDetailsChange}
+                    fullWidth
+                    margin="normal"
+                  />
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Expiry Date (MM/YY)"
+                        name="expiryDate"
+                        value={cardDetails.expiryDate}
+                        onChange={handleCardDetailsChange}
+                        fullWidth
+                        margin="normal"
+                        placeholder="MM/YY"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="CVV"
+                        name="cvv"
+                        value={cardDetails.cvv}
+                        onChange={handleCardDetailsChange}
+                        fullWidth
+                        margin="normal"
+                        type="password"
+                      />
+                    </Grid>
+                  </Grid>
+                </>
+              )}
+              
+              {paymentMethod === 'netBanking' && (
+                <Box sx={{ mt: 2 }}>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Select Bank</InputLabel>
+                    <Select
+                      value=""
+                      label="Select Bank"
+                    >
+                      <MenuItem value="sbi">State Bank of India</MenuItem>
+                      <MenuItem value="hdfc">HDFC Bank</MenuItem>
+                      <MenuItem value="icici">ICICI Bank</MenuItem>
+                      <MenuItem value="axis">Axis Bank</MenuItem>
+                      <MenuItem value="pnb">Punjab National Bank</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                    You will be redirected to your bank's website to complete the payment.
+                  </Typography>
+                </Box>
+              )}
+              
+              {paymentMethod === 'upi' && (
+                <Box sx={{ mt: 2 }}>
+                  <TextField
+                    label="UPI ID"
+                    fullWidth
+                    margin="normal"
+                    placeholder="example@upi"
+                    helperText="Enter your UPI ID (e.g., mobilenumber@upi, username@bankname)"
+                  />
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                    You will receive a payment request on your UPI app to complete the transaction.
+                  </Typography>
+                </Box>
+              )}
+              
+              <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Payment Summary
+                </Typography>
+                <Grid container spacing={1}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Amount:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" align="right">
+                      {formatCurrency(paymentAmount)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Payment Method:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" align="right">
+                      {paymentMethod === 'creditCard' && 'Credit/Debit Card'}
+                      {paymentMethod === 'netBanking' && 'Net Banking'}
+                      {paymentMethod === 'upi' && 'UPI Payment'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1 }} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="subtitle2">
+                      Total:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="subtitle2" align="right">
+                      {formatCurrency(paymentAmount)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          )}
+          
+          {activeStep === 3 && (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              {paymentProcessing ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <CircularProgress sx={{ mb: 2 }} />
+                  <Typography variant="h6">
+                    Processing Payment
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Please wait while we process your payment...
+                  </Typography>
+                </Box>
+              ) : paymentSuccess ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <CheckCircleIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    Payment Successful!
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Your payment of {formatCurrency(paymentAmount)} has been processed successfully.
+                  </Typography>
+                  <Typography variant="body2" paragraph color="text.secondary">
+                    Transaction ID: TXN{Math.floor(Math.random() * 10000000)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    A receipt has been sent to your registered email address.
+                  </Typography>
+                  
+                  <Box sx={{ mt: 3 }}>
+                    <Button 
+                      variant="outlined" 
+                      startIcon={<ReceiptIcon />}
+                      sx={{ mr: 2 }}
+                    >
+                      View Receipt
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      startIcon={<DownloadIcon />}
+                    >
+                      Download Receipt
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Box>
+                  <Typography variant="h6" color="error">
+                    Payment Failed
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    There was an error processing your payment. Please try again.
+                  </Typography>
+                </Box>
+              )}
+            </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ justifyContent: activeStep === 2 && paymentSuccess ? 'center' : 'space-between' }}>
-          {activeStep === 2 && paymentSuccess ? (
-            <Button onClick={handlePayDialogClose} variant="contained" color="primary">
-              Done
+        <DialogActions>
+          {activeStep === steps.length - 1 ? (
+            <Button onClick={handlePaymentDialogClose} disabled={paymentProcessing}>
+              Close
             </Button>
           ) : (
             <>
               <Button 
-                onClick={handleBack} 
-                disabled={activeStep === 0}
+                onClick={handlePaymentDialogClose} 
+                disabled={paymentProcessing}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleBackStep} 
+                disabled={activeStep === 0 || paymentProcessing}
               >
                 Back
               </Button>
               <Button 
                 variant="contained" 
-                onClick={handleNext}
-                disabled={activeStep === 0 && !paymentMethod}
+                color="primary" 
+                onClick={activeStep === 2 ? handlePaymentSubmit : handleNextStep}
+                disabled={(activeStep === 0 && (paymentAmount <= 0 || paymentAmount > MOCK_PAYMENT_DATA.fees.balance)) || paymentProcessing}
               >
-                {activeStep === steps.length - 1 ? 'Pay' : 'Next'}
+                {activeStep === 2 ? 'Make Payment' : 'Next'}
               </Button>
             </>
           )}
@@ -600,138 +929,142 @@ const Payments = () => {
       
       {/* Receipt Dialog */}
       <Dialog
-        open={openReceiptDialog}
-        onClose={handleReceiptDialogClose}
-        maxWidth="sm"
+        open={receiptDialogOpen}
+        onClose={handleCloseReceiptDialog}
+        maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          Payment Receipt
-          <IconButton
-            aria-label="close"
-            onClick={handleReceiptDialogClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {selectedPayment && (
-            <Box sx={{ p: 2 }}>
-              <Box sx={{ textAlign: 'center', mb: 3 }}>
-                <Typography variant="h5" gutterBottom>
-                  College Portal
-                </Typography>
-                <Typography variant="subtitle1">
-                  Payment Receipt
-                </Typography>
-              </Box>
-              
-              <Divider sx={{ mb: 3 }} />
-              
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Receipt No.
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.id}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(selectedPayment.paymentDate)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Student Name
-                  </Typography>
-                  <Typography variant="body1">
-                    {user?.name || 'John Doe'}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Registration No.
-                  </Typography>
-                  <Typography variant="body1">
-                    {user?.regNumber || 'REG12345'}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Payment For
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.type}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Academic Year
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.academicYear}, {selectedPayment.semester}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Payment Method
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.paymentMethod}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Transaction ID
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedPayment.transactionId}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      Amount Paid
+        {selectedReceipt && (
+          <>
+            <DialogTitle>
+              Payment Receipt
+            </DialogTitle>
+            <DialogContent dividers>
+              <Box sx={{ p: 2, border: '1px dashed #ccc' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      College Portal
                     </Typography>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {formatCurrency(selectedPayment.amount)}
+                    <Typography variant="body2">
+                      123 Education Street
+                    </Typography>
+                    <Typography variant="body2">
+                      Knowledge City, ED 12345
+                    </Typography>
+                    <Typography variant="body2">
+                      Phone: (123) 456-7890
                     </Typography>
                   </Box>
-                </Grid>
-              </Grid>
-              
-              <Box sx={{ textAlign: 'center', mt: 4, mb: 2 }}>
-                <Typography variant="body2" color="textSecondary">
-                  This is an electronically generated receipt and does not require a signature.
-                </Typography>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Receipt
+                    </Typography>
+                    <Typography variant="body2">
+                      Receipt No: {selectedReceipt.id}
+                    </Typography>
+                    <Typography variant="body2">
+                      Date: {formatDate(selectedReceipt.date)}
+                    </Typography>
+                    <Typography variant="body2">
+                      Reference: {selectedReceipt.reference}
+                    </Typography>
+                  </Box>
+                </Box>
+                
+                <Divider sx={{ mb: 3 }} />
+                
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Student Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2">
+                        <strong>ID:</strong> {MOCK_PAYMENT_DATA.student.id}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Name:</strong> {MOCK_PAYMENT_DATA.student.name}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2">
+                        <strong>Program:</strong> {MOCK_PAYMENT_DATA.student.program}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Batch:</strong> {MOCK_PAYMENT_DATA.student.batch}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Payment Details
+                  </Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Description</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>{selectedReceipt.description}</TableCell>
+                          <TableCell align="right">{formatCurrency(selectedReceipt.amount)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell><strong>Total</strong></TableCell>
+                          <TableCell align="right"><strong>{formatCurrency(selectedReceipt.amount)}</strong></TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+                
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Payment Method
+                  </Typography>
+                  <Typography variant="body2">
+                    {selectedReceipt.mode}
+                  </Typography>
+                </Box>
+                
+                <Divider sx={{ mb: 3 }} />
+                
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="body2" gutterBottom>
+                    This is a computer-generated receipt and does not require a signature.
+                  </Typography>
+                  <Typography variant="body2">
+                    For any queries, please contact the accounts department.
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button 
-            startIcon={<DownloadIcon />}
-            onClick={handleReceiptDialogClose}
-          >
-            Download
-          </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleReceiptDialogClose}
-          >
-            Close
-          </Button>
-        </DialogActions>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseReceiptDialog}>
+                Close
+              </Button>
+              <Button 
+                variant="contained" 
+                startIcon={<PrintIcon />}
+              >
+                Print
+              </Button>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                startIcon={<DownloadIcon />}
+              >
+                Download
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </Container>
   );

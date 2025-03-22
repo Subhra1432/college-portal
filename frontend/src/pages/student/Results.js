@@ -12,450 +12,524 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Divider,
   Card,
   CardContent,
+  Divider,
+  Tabs,
+  Tab,
+  Button,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
-  Button,
-  Chip,
+  InputLabel,
   LinearProgress,
   IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Chip,
 } from '@mui/material';
 import {
-  ExpandMore as ExpandMoreIcon,
+  Assessment as AssessmentIcon,
   School as SchoolIcon,
-  Grade as GradeIcon,
-  Download as DownloadIcon,
   Print as PrintIcon,
-  Share as ShareIcon,
+  GetApp as DownloadIcon,
+  Star as StarIcon,
+  Grade as GradeIcon,
+  Timeline as TimelineIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  EmojiEvents as EmojiEventsIcon,
 } from '@mui/icons-material';
 
-// Dummy results data
-const DUMMY_SEMESTERS = [
-  {
-    id: 1,
-    name: 'Semester 1',
-    year: '2021-2022',
-    term: 'Fall',
-    gpa: 3.8,
-    results: [
-      { subjectCode: 'CS101', subjectName: 'Introduction to Computer Science', credits: 4, grade: 'A', points: 16 },
-      { subjectCode: 'MA101', subjectName: 'Engineering Mathematics', credits: 4, grade: 'A-', points: 14.8 },
-      { subjectCode: 'PH101', subjectName: 'Engineering Physics', credits: 3, grade: 'B+', points: 9.9 },
-      { subjectCode: 'EN101', subjectName: 'Technical English', credits: 2, grade: 'A', points: 8 },
-      { subjectCode: 'CS102', subjectName: 'Programming Fundamentals', credits: 4, grade: 'A', points: 16 },
-    ],
+// Mock results data
+const MOCK_RESULTS = {
+  student: {
+    id: 'CS2023001',
+    name: 'John Smith',
+    program: 'B.Tech',
+    department: 'Computer Science and Engineering',
+    batch: '2022-2026',
+    currentSemester: 3,
   },
-  {
-    id: 2,
-    name: 'Semester 2',
-    year: '2021-2022',
-    term: 'Spring',
-    gpa: 3.7,
-    results: [
-      { subjectCode: 'CS201', subjectName: 'Data Structures and Algorithms', credits: 4, grade: 'A-', points: 14.8 },
-      { subjectCode: 'MA201', subjectName: 'Advanced Mathematics', credits: 4, grade: 'B+', points: 13.2 },
-      { subjectCode: 'CS202', subjectName: 'Digital Logic Design', credits: 4, grade: 'A', points: 16 },
-      { subjectCode: 'CS203', subjectName: 'Object-Oriented Programming', credits: 4, grade: 'A', points: 16 },
-      { subjectCode: 'HU201', subjectName: 'Economics for Engineers', credits: 2, grade: 'B', points: 6 },
-    ],
+  currentCGPA: 8.75,
+  semesters: [
+    {
+      semesterNumber: 1,
+      year: '2022',
+      term: 'Fall',
+      sgpa: 8.5,
+      status: 'Completed',
+      courses: [
+        { code: 'CS101', name: 'Introduction to Programming', credits: 4, grade: 'A', points: 9 },
+        { code: 'MA101', name: 'Engineering Mathematics I', credits: 4, grade: 'A', points: 9 },
+        { code: 'PH101', name: 'Engineering Physics', credits: 3, grade: 'B+', points: 8 },
+        { code: 'HS101', name: 'Communication Skills', credits: 2, grade: 'A', points: 9 },
+        { code: 'ES101', name: 'Engineering Drawing', credits: 3, grade: 'B', points: 7 },
+      ],
+    },
+    {
+      semesterNumber: 2,
+      year: '2023',
+      term: 'Spring',
+      sgpa: 9.0,
+      status: 'Completed',
+      courses: [
+        { code: 'CS102', name: 'Data Structures', credits: 4, grade: 'A+', points: 10 },
+        { code: 'MA102', name: 'Engineering Mathematics II', credits: 4, grade: 'A', points: 9 },
+        { code: 'EC101', name: 'Basic Electronics', credits: 3, grade: 'A', points: 9 },
+        { code: 'CS103', name: 'Computer Organization', credits: 3, grade: 'A-', points: 8 },
+        { code: 'HS102', name: 'Professional Ethics', credits: 2, grade: 'B+', points: 8 },
+      ],
+    },
+    {
+      semesterNumber: 3,
+      year: '2023',
+      term: 'Fall',
+      sgpa: 8.75,
+      status: 'In Progress',
+      courses: [
+        { code: 'CS201', name: 'Algorithm Design', credits: 4, grade: 'A', points: 9 },
+        { code: 'CS202', name: 'Database Systems', credits: 4, grade: 'A-', points: 8 },
+        { code: 'CS203', name: 'Operating Systems', credits: 3, grade: 'B+', points: 8 },
+        { code: 'CS204', name: 'Computer Networks', credits: 3, grade: 'A', points: 9 },
+        { code: 'HS201', name: 'Economics for Engineers', credits: 2, grade: 'A+', points: 10 },
+      ],
+    },
+  ],
+  overallProgress: {
+    totalCreditsRequired: 160,
+    totalCreditsPassed: 45,
+    currentCredits: 16,
+    completionPercentage: 28.13,
   },
-  {
-    id: 3,
-    name: 'Semester 3',
-    year: '2022-2023',
-    term: 'Fall',
-    gpa: 3.9,
-    results: [
-      { subjectCode: 'CS301', subjectName: 'Database Management Systems', credits: 4, grade: 'A', points: 16 },
-      { subjectCode: 'CS302', subjectName: 'Computer Organization', credits: 4, grade: 'A', points: 16 },
-      { subjectCode: 'CS303', subjectName: 'Operating Systems', credits: 4, grade: 'A-', points: 14.8 },
-      { subjectCode: 'CS304', subjectName: 'Design and Analysis of Algorithms', credits: 4, grade: 'A', points: 16 },
-      { subjectCode: 'HU301', subjectName: 'Professional Ethics', credits: 2, grade: 'A', points: 8 },
-    ],
+  gradeDistribution: {
+    'A+': 2,
+    'A': 6,
+    'A-': 2,
+    'B+': 3,
+    'B': 1,
+    'B-': 0,
+    'C+': 0,
+    'C': 0,
+    'D': 0,
+    'F': 0,
   },
-];
+};
 
 const Results = () => {
   const { user } = useSelector((state) => state.auth);
-  const [selectedSemester, setSelectedSemester] = useState(DUMMY_SEMESTERS[0].id);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedSemester, setSelectedSemester] = useState(MOCK_RESULTS.currentSemester);
   
-  // Get selected semester data
-  const getSemesterData = () => {
-    return DUMMY_SEMESTERS.find(semester => semester.id === selectedSemester);
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
   };
   
-  // Calculate total credits for the semester
-  const calculateTotalCredits = (semesterData) => {
-    return semesterData.results.reduce((total, subject) => total + subject.credits, 0);
+  const handleSemesterChange = (event) => {
+    setSelectedSemester(event.target.value);
   };
   
-  // Format GPA
-  const formatGPA = (gpa) => {
-    return gpa.toFixed(2);
-  };
+  // Get the currently selected semester data
+  const currentSemesterData = MOCK_RESULTS.semesters.find(
+    semester => semester.semesterNumber === selectedSemester
+  );
   
-  // Calculate cumulative GPA
-  const calculateCGPA = () => {
-    let totalPoints = 0;
-    let totalCredits = 0;
-    
-    DUMMY_SEMESTERS.forEach(semester => {
-      semester.results.forEach(subject => {
-        totalPoints += subject.points;
-        totalCredits += subject.credits;
-      });
-    });
-    
-    return totalPoints / totalCredits;
-  };
-  
-  // Get color based on grade
+  // Functions to get grade color
   const getGradeColor = (grade) => {
-    switch (grade) {
-      case 'A':
-      case 'A+':
-        return 'success';
-      case 'A-':
-      case 'B+':
-      case 'B':
-        return 'primary';
-      case 'B-':
-      case 'C+':
-      case 'C':
-        return 'warning';
-      default:
-        return 'error';
-    }
+    if (grade.startsWith('A')) return 'success.main';
+    if (grade.startsWith('B')) return 'info.main';
+    if (grade.startsWith('C')) return 'warning.main';
+    return 'error.main';
   };
   
-  // Get numeric value of grade
-  const getGradeValue = (grade) => {
-    switch (grade) {
-      case 'A+': return 4.0;
-      case 'A': return 4.0;
-      case 'A-': return 3.7;
-      case 'B+': return 3.3;
-      case 'B': return 3.0;
-      case 'B-': return 2.7;
-      case 'C+': return 2.3;
-      case 'C': return 2.0;
-      case 'C-': return 1.7;
-      case 'D+': return 1.3;
-      case 'D': return 1.0;
-      case 'F': return 0.0;
-      default: return 0.0;
-    }
+  // Format semester title
+  const formatSemesterTitle = (semester) => {
+    return `Semester ${semester.semesterNumber} (${semester.term} ${semester.year})`;
   };
   
-  const cgpa = calculateCGPA();
-  const semesterData = getSemesterData();
-  const totalCredits = calculateTotalCredits(semesterData);
+  // Calculate total credits and total points for a semester
+  const calculateSemesterTotals = (semester) => {
+    const totalCredits = semester.courses.reduce((sum, course) => sum + course.credits, 0);
+    const totalPoints = semester.courses.reduce((sum, course) => sum + (course.credits * course.points), 0);
+    return { totalCredits, totalPoints };
+  };
+  
+  // Get grade description
+  const getGradeDescription = (grade) => {
+    const descriptions = {
+      'A+': 'Outstanding',
+      'A': 'Excellent',
+      'A-': 'Very Good',
+      'B+': 'Good',
+      'B': 'Above Average',
+      'B-': 'Average',
+      'C+': 'Satisfactory',
+      'C': 'Sufficient',
+      'D': 'Pass',
+      'F': 'Fail',
+    };
+    return descriptions[grade] || '';
+  };
+  
+  // Get semester performance trend
+  const getSemesterTrend = () => {
+    if (MOCK_RESULTS.semesters.length < 2) return 'neutral';
+    
+    const lastTwoSemesters = MOCK_RESULTS.semesters.slice(-2);
+    const diff = lastTwoSemesters[1].sgpa - lastTwoSemesters[0].sgpa;
+    
+    if (diff > 0.2) return 'up';
+    if (diff < -0.2) return 'down';
+    return 'neutral';
+  };
+  
+  const semesterTrend = getSemesterTrend();
   
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Academic Results
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <AssessmentIcon sx={{ fontSize: 30, mr: 1, color: 'primary.main' }} />
+            <Typography variant="h4" component="h1">
+              Academic Results
+            </Typography>
+          </Box>
         </Grid>
         
-        {/* GPA Summary Cards */}
-        <Grid item xs={12}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <GradeIcon color="primary" sx={{ mr: 1, fontSize: 28 }} />
-                    <Typography variant="h6">
-                      Cumulative GPA
-                    </Typography>
-                  </Box>
-                  <Typography variant="h3" color="primary" align="center">
-                    {formatGPA(cgpa)}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                    <Box sx={{ width: '100%', mr: 1 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={(cgpa / 4) * 100} 
-                        color="primary"
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
-                    </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {Math.round((cgpa / 4) * 100)}%
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <SchoolIcon color="primary" sx={{ mr: 1, fontSize: 28 }} />
-                    <Typography variant="h6">
-                      Current Standing
-                    </Typography>
-                  </Box>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Chip 
-                      label={cgpa >= 3.7 ? "Distinction" : cgpa >= 3.0 ? "First Class" : cgpa >= 2.0 ? "Second Class" : "Needs Improvement"}
-                      color={cgpa >= 3.7 ? "success" : cgpa >= 3.0 ? "primary" : cgpa >= 2.0 ? "warning" : "error"}
-                      sx={{ fontSize: '1.2rem', py: 2, px: 3 }}
-                    />
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                      Based on your cumulative GPA
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <SchoolIcon color="primary" sx={{ mr: 1, fontSize: 28 }} />
-                    <Typography variant="h6">
-                      Total Credits
-                    </Typography>
-                  </Box>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h3" color="primary">
-                      {DUMMY_SEMESTERS.reduce((total, semester) => 
-                        total + calculateTotalCredits(semester), 0
-                      )}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                      Credits completed across all semesters
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+        {/* Summary Cards */}
+        <Grid item xs={12} md={4}>
+          <Card 
+            elevation={3} 
+            sx={{ 
+              height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column',
+              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+              color: 'white',
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <GradeIcon sx={{ mr: 1 }} />
+                <Typography variant="h6">
+                  Current CGPA
+                </Typography>
+              </Box>
+              <Typography variant="h3" component="div" gutterBottom>
+                {MOCK_RESULTS.currentCGPA.toFixed(2)}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {semesterTrend === 'up' && <TrendingUpIcon color="inherit" sx={{ mr: 0.5 }} />}
+                {semesterTrend === 'down' && <TrendingDownIcon color="inherit" sx={{ mr: 0.5 }} />}
+                {semesterTrend === 'neutral' && <TimelineIcon color="inherit" sx={{ mr: 0.5 }} />}
+                <Typography variant="body2">
+                  {semesterTrend === 'up' && 'Improving trend'}
+                  {semesterTrend === 'down' && 'Declining trend'}
+                  {semesterTrend === 'neutral' && 'Stable performance'}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
         
-        {/* Semester Results */}
+        <Grid item xs={12} md={4}>
+          <Card 
+            elevation={3} 
+            sx={{ 
+              height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column' 
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <SchoolIcon sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" color="primary">
+                  Program Progress
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {MOCK_RESULTS.overallProgress.completionPercentage.toFixed(1)}% Completed
+                </Typography>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={MOCK_RESULTS.overallProgress.completionPercentage} 
+                  sx={{ height: 10, borderRadius: 5 }}
+                />
+              </Box>
+              <Typography variant="body2">
+                <strong>{MOCK_RESULTS.overallProgress.totalCreditsPassed}</strong> of <strong>{MOCK_RESULTS.overallProgress.totalCreditsRequired}</strong> credits completed
+              </Typography>
+              <Typography variant="body2">
+                <strong>{MOCK_RESULTS.overallProgress.currentCredits}</strong> credits in progress
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Card 
+            elevation={3} 
+            sx={{ 
+              height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column' 
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <EmojiEventsIcon sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" color="primary">
+                  Academic Achievements
+                </Typography>
+              </Box>
+              <Typography variant="body2" paragraph>
+                Top grades:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Chip 
+                  icon={<StarIcon />} 
+                  label={`${MOCK_RESULTS.gradeDistribution['A+']} A+ Grades`} 
+                  color="success" 
+                  size="small" 
+                />
+                <Chip 
+                  icon={<StarIcon />} 
+                  label={`${MOCK_RESULTS.gradeDistribution['A']} A Grades`} 
+                  color="success" 
+                  size="small" 
+                />
+                <Chip 
+                  icon={<StarIcon />} 
+                  label={`${MOCK_RESULTS.gradeDistribution['A-']} A- Grades`} 
+                  color="success" 
+                  size="small" 
+                />
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        {/* Tabs for Semester Results and Performance */}
         <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">
-                Semester Results
-              </Typography>
-              
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
-                  <InputLabel>Select Semester</InputLabel>
-                  <Select
-                    value={selectedSemester}
-                    onChange={(e) => setSelectedSemester(e.target.value)}
-                    label="Select Semester"
-                  >
-                    {DUMMY_SEMESTERS.map(semester => (
-                      <MenuItem key={semester.id} value={semester.id}>
-                        {semester.name} ({semester.year}, {semester.term})
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+            <Tabs value={selectedTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+              <Tab label="Semester Results" icon={<AssessmentIcon />} iconPosition="start" />
+              <Tab label="Overall Performance" icon={<TimelineIcon />} iconPosition="start" />
+            </Tabs>
+            
+            {selectedTab === 0 && (
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <FormControl sx={{ minWidth: 250 }}>
+                    <InputLabel>Select Semester</InputLabel>
+                    <Select
+                      value={selectedSemester}
+                      onChange={handleSemesterChange}
+                      label="Select Semester"
+                    >
+                      {MOCK_RESULTS.semesters.map((semester) => (
+                        <MenuItem key={semester.semesterNumber} value={semester.semesterNumber}>
+                          {formatSemesterTitle(semester)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <Box>
+                    <IconButton color="primary" title="Print Results">
+                      <PrintIcon />
+                    </IconButton>
+                    <IconButton color="primary" title="Download Results">
+                      <DownloadIcon />
+                    </IconButton>
+                  </Box>
+                </Box>
                 
-                <Button
-                  variant="outlined"
-                  startIcon={<DownloadIcon />}
-                  size="small"
-                >
-                  Download
-                </Button>
-                
-                <Button
-                  variant="outlined"
-                  startIcon={<PrintIcon />}
-                  size="small"
-                >
-                  Print
-                </Button>
-              </Box>
-            </Box>
-            
-            <Divider sx={{ mb: 3 }} />
-            
-            <Box sx={{ mb: 3 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Semester
-                  </Typography>
-                  <Typography variant="body1">
-                    {semesterData.name}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Academic Year
-                  </Typography>
-                  <Typography variant="body1">
-                    {semesterData.year}, {semesterData.term}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    GPA
-                  </Typography>
-                  <Typography variant="body1" fontWeight="bold">
-                    {formatGPA(semesterData.gpa)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Credits
-                  </Typography>
-                  <Typography variant="body1">
-                    {totalCredits}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Box>
-            
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell><Typography variant="subtitle2">Subject Code</Typography></TableCell>
-                    <TableCell><Typography variant="subtitle2">Subject Name</Typography></TableCell>
-                    <TableCell align="center"><Typography variant="subtitle2">Credits</Typography></TableCell>
-                    <TableCell align="center"><Typography variant="subtitle2">Grade</Typography></TableCell>
-                    <TableCell align="center"><Typography variant="subtitle2">Grade Points</Typography></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {semesterData.results.map((subject) => (
-                    <TableRow key={subject.subjectCode}>
-                      <TableCell>{subject.subjectCode}</TableCell>
-                      <TableCell>{subject.subjectName}</TableCell>
-                      <TableCell align="center">{subject.credits}</TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={subject.grade}
-                          color={getGradeColor(subject.grade)}
-                          size="small"
+                {currentSemesterData && (
+                  <>
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6">
+                        {formatSemesterTitle(currentSemesterData)}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                        <Chip 
+                          label={`SGPA: ${currentSemesterData.sgpa.toFixed(2)}`} 
+                          color="primary" 
                         />
-                      </TableCell>
-                      <TableCell align="center">{subject.points}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow>
-                    <TableCell colSpan={2} align="right">
-                      <Typography variant="subtitle2">Total</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle2">{totalCredits}</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle2">GPA</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle2">{formatGPA(semesterData.gpa)}</Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
+                        <Chip 
+                          label={`Status: ${currentSemesterData.status}`} 
+                          color={currentSemesterData.status === 'Completed' ? 'success' : 'info'} 
+                        />
+                      </Box>
+                    </Box>
+                    
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Course Code</TableCell>
+                            <TableCell>Course Name</TableCell>
+                            <TableCell align="center">Credits</TableCell>
+                            <TableCell align="center">Grade</TableCell>
+                            <TableCell>Grade Points</TableCell>
+                            <TableCell align="right">Credit Points</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {currentSemesterData.courses.map((course) => (
+                            <TableRow key={course.code}>
+                              <TableCell>{course.code}</TableCell>
+                              <TableCell>{course.name}</TableCell>
+                              <TableCell align="center">{course.credits}</TableCell>
+                              <TableCell align="center">
+                                <Chip 
+                                  label={course.grade} 
+                                  size="small" 
+                                  sx={{ 
+                                    bgcolor: getGradeColor(course.grade),
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                  }} 
+                                />
+                              </TableCell>
+                              <TableCell>{course.points} - {getGradeDescription(course.grade)}</TableCell>
+                              <TableCell align="right">{course.credits * course.points}</TableCell>
+                            </TableRow>
+                          ))}
+                          
+                          {/* Summary row */}
+                          <TableRow sx={{ '& td': { fontWeight: 'bold', bgcolor: 'rgba(0, 0, 0, 0.04)' } }}>
+                            <TableCell colSpan={2}>Semester Totals</TableCell>
+                            <TableCell align="center">{calculateSemesterTotals(currentSemesterData).totalCredits}</TableCell>
+                            <TableCell align="center">SGPA: {currentSemesterData.sgpa.toFixed(2)}</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell align="right">{calculateSemesterTotals(currentSemesterData).totalPoints}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    
+                    <Box sx={{ mt: 3 }}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        * SGPA = Total Credit Points / Total Credits
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        * Grade Points: A+ (10), A (9), A- (8), B+ (7), B (6), B- (5), C+ (4), C (3), D (2), F (0)
+                      </Typography>
+                    </Box>
+                  </>
+                )}
+              </>
+            )}
+            
+            {selectedTab === 1 && (
+              <>
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Cumulative Performance
+                  </Typography>
+                  <Typography variant="body2" paragraph>
+                    Below is a summary of your performance across all semesters.
+                  </Typography>
+                </Box>
+                
+                <TableContainer sx={{ mb: 4 }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Semester</TableCell>
+                        <TableCell align="center">Credits Attempted</TableCell>
+                        <TableCell align="center">SGPA</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell align="right">Cumulative GPA</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {MOCK_RESULTS.semesters.map((semester, index) => {
+                        // Calculate running CGPA
+                        const runningCGPA = MOCK_RESULTS.semesters
+                          .slice(0, index + 1)
+                          .reduce((total, sem, i, array) => {
+                            const weight = calculateSemesterTotals(sem).totalCredits;
+                            return total + (sem.sgpa * weight);
+                          }, 0) / 
+                          MOCK_RESULTS.semesters
+                            .slice(0, index + 1)
+                            .reduce((total, sem) => total + calculateSemesterTotals(sem).totalCredits, 0);
+                            
+                        return (
+                          <TableRow key={semester.semesterNumber}>
+                            <TableCell>{formatSemesterTitle(semester)}</TableCell>
+                            <TableCell align="center">{calculateSemesterTotals(semester).totalCredits}</TableCell>
+                            <TableCell align="center">
+                              <Chip 
+                                label={semester.sgpa.toFixed(2)} 
+                                size="small" 
+                                color={
+                                  semester.sgpa >= 9 ? 'success' : 
+                                  semester.sgpa >= 8 ? 'primary' : 
+                                  semester.sgpa >= 7 ? 'info' : 
+                                  semester.sgpa >= 6 ? 'warning' : 'error'
+                                } 
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip 
+                                label={semester.status} 
+                                size="small" 
+                                color={semester.status === 'Completed' ? 'success' : 'info'} 
+                              />
+                            </TableCell>
+                            <TableCell align="right">{runningCGPA.toFixed(2)}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                
+                <Divider sx={{ my: 3 }} />
+                
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Grade Distribution
+                  </Typography>
+                  <Typography variant="body2" paragraph>
+                    Summary of grades earned across all completed courses.
+                  </Typography>
+                  
+                  <Grid container spacing={2}>
+                    {Object.entries(MOCK_RESULTS.gradeDistribution).map(([grade, count]) => (
+                      <Grid item xs={6} sm={4} md={2} key={grade}>
+                        <Card elevation={2} sx={{ textAlign: 'center', p: 1 }}>
+                          <Typography variant="h5" sx={{ color: getGradeColor(grade) }}>
+                            {grade}
+                          </Typography>
+                          <Typography variant="h6">
+                            {count}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            courses
+                          </Typography>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+                
+                <Box sx={{ textAlign: 'center', mt: 4 }}>
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    startIcon={<DownloadIcon />}
+                  >
+                    Download Complete Transcript
+                  </Button>
+                </Box>
+              </>
+            )}
           </Paper>
-        </Grid>
-        
-        {/* Grade Distribution */}
-        <Grid item xs={12}>
-          <Accordion elevation={3}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="grade-distribution-content"
-              id="grade-distribution-header"
-            >
-              <Typography variant="h6">Grading System</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell><Typography variant="subtitle2">Letter Grade</Typography></TableCell>
-                      <TableCell align="center"><Typography variant="subtitle2">Grade Point</Typography></TableCell>
-                      <TableCell><Typography variant="subtitle2">Description</Typography></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>A+</TableCell>
-                      <TableCell align="center">4.0</TableCell>
-                      <TableCell>Outstanding</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>A</TableCell>
-                      <TableCell align="center">4.0</TableCell>
-                      <TableCell>Excellent</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>A-</TableCell>
-                      <TableCell align="center">3.7</TableCell>
-                      <TableCell>Very Good</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>B+</TableCell>
-                      <TableCell align="center">3.3</TableCell>
-                      <TableCell>Good</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>B</TableCell>
-                      <TableCell align="center">3.0</TableCell>
-                      <TableCell>Above Average</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>B-</TableCell>
-                      <TableCell align="center">2.7</TableCell>
-                      <TableCell>Average</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>C+</TableCell>
-                      <TableCell align="center">2.3</TableCell>
-                      <TableCell>Below Average</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>C</TableCell>
-                      <TableCell align="center">2.0</TableCell>
-                      <TableCell>Satisfactory</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>C-</TableCell>
-                      <TableCell align="center">1.7</TableCell>
-                      <TableCell>Passing</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>D</TableCell>
-                      <TableCell align="center">1.0</TableCell>
-                      <TableCell>Poor</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>F</TableCell>
-                      <TableCell align="center">0.0</TableCell>
-                      <TableCell>Failure</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </AccordionDetails>
-          </Accordion>
         </Grid>
       </Grid>
     </Container>
