@@ -215,7 +215,19 @@ const Attendance = () => {
   };
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }} className="attendance-container">
+    <Container 
+      maxWidth="lg" 
+      sx={{ 
+        mt: 4, 
+        mb: 4,
+        pb: 8,
+        height: 'auto',
+        overflow: 'visible',
+        display: 'flex',
+        flexDirection: 'column'
+      }} 
+      className="attendance-container"
+    >
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -329,7 +341,16 @@ const Attendance = () => {
         
         {/* Tabs for different attendance views */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3 }}>
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              p: 3,
+              height: 'auto',
+              overflow: 'visible',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
               <Tabs 
                 value={selectedTab} 
@@ -386,7 +407,15 @@ const Attendance = () => {
                   </Box>
                 </Box>
                 
-                <TableContainer sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <TableContainer 
+                  sx={{ 
+                    maxHeight: '350px', 
+                    overflowY: 'auto',
+                    border: '1px solid rgba(224, 224, 224, 1)',
+                    borderRadius: 1,
+                    mb: 3
+                  }}
+                >
                   <Table stickyHeader aria-label="attendance log table">
                     <TableHead>
                       <TableRow>
@@ -478,8 +507,8 @@ const Attendance = () => {
                   <Typography variant="subtitle1" gutterBottom>
                     Semester Attendance Summary
                   </Typography>
-                  <TableContainer component={Paper} sx={{ mt: 2 }}>
-                    <Table size="small">
+                  <TableContainer component={Paper} sx={{ mt: 2, maxHeight: '350px', overflowY: 'auto' }}>
+                    <Table size="small" stickyHeader>
                       <TableHead>
                         <TableRow>
                           <TableCell>Subject</TableCell>

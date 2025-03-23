@@ -533,7 +533,9 @@ const MainLayout = ({ children }) => {
           overflowY: 'auto',
           overflowX: 'hidden',
           position: 'relative',
-          paddingBottom: '50px',
+          paddingBottom: '80px',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         <Toolbar />

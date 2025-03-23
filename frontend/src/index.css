@@ -25,8 +25,9 @@ body {
 .MuiBox-root[component="main"] {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  max-height: 100vh;
+  max-height: none !important;
   height: auto !important; /* Ensure content can grow */
+  padding-bottom: 80px !important; /* Additional padding to ensure everything is visible */
 }
 
 /* Fix for long content in components */
@@ -92,7 +93,7 @@ body {
 
 /* Fix for Attendance page's table */
 .MuiPaper-root .MuiTableContainer-root {
-  max-height: 60vh;
+  max-height: 350px;
   overflow-y: auto;
 }
 
@@ -100,7 +101,24 @@ body {
 .attendance-container {
   height: auto !important;
   overflow-y: visible !important;
-  padding-bottom: 100px; /* Add extra padding at bottom for safety */
+  padding-bottom: 100px !important; /* Add extra padding at bottom for safety */
+  min-height: 100%;
+  position: relative;
+}
+
+/* Make sure papers in attendance page can grow */
+.attendance-container .MuiPaper-root {
+  height: auto !important;
+  overflow: visible !important;
+  margin-bottom: 16px;
+}
+
+/* Fix for table in Monthly Stats tab */
+.attendance-container [role="tabpanel"] .MuiTableContainer-root {
+  max-height: 350px;
+  margin-top: 16px;
+  border: 1px solid rgba(224, 224, 224, 1);
+  border-radius: 4px;
 }
 
 /* Fix for Payments page */
