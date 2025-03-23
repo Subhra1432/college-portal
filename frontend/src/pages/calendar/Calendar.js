@@ -188,7 +188,14 @@ const Calendar = () => {
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(
-        <Box key={`empty-${i}`} sx={{ p: 1, borderBottom: '1px solid rgba(0, 0, 0, 0.12)', borderRight: '1px solid rgba(0, 0, 0, 0.12)', height: '120px' }} />
+        <Box key={`empty-${i}`} sx={{ 
+          p: 1, 
+          borderBottom: '1px solid rgba(0, 0, 0, 0.12)', 
+          borderRight: '1px solid rgba(0, 0, 0, 0.12)', 
+          height: { xs: 'auto', md: '100px' },
+          minHeight: { xs: '60px', md: '80px' },
+          maxHeight: { xs: '80px', md: '100px' }
+        }} />
       );
     }
     
@@ -207,14 +214,17 @@ const Calendar = () => {
             p: 1, 
             borderBottom: '1px solid rgba(0, 0, 0, 0.12)', 
             borderRight: '1px solid rgba(0, 0, 0, 0.12)', 
-            height: '120px',
+            height: { xs: 'auto', md: '100px' },
+            minHeight: { xs: '60px', md: '80px' },
+            maxHeight: { xs: '80px', md: '100px' },
             backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
             cursor: 'pointer',
             '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)',
             },
             position: 'relative',
-            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <Typography 
@@ -234,12 +244,12 @@ const Calendar = () => {
             {day}
           </Typography>
           
-          <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5, flex: 1 }}>
             {events.slice(0, 2).map(event => (
               <Chip
                 key={event.id}
                 size="small"
-                label={event.title}
+                label={event.title.length > 20 ? event.title.substring(0, 20) + '...' : event.title}
                 color={getEventTypeColor(event.type)}
                 variant="outlined"
                 onClick={(e) => {
@@ -417,7 +427,11 @@ const Calendar = () => {
               gridTemplateColumns: 'repeat(7, 1fr)', 
               borderTop: '1px solid rgba(0, 0, 0, 0.12)',
               borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
-            }}>
+              width: '100%',
+              height: 'auto',
+              aspectRatio: { xs: 'initial', md: '7/5' },
+            }}
+            className="calendar-grid">
               {renderCalendarGrid()}
             </Box>
           </Paper>

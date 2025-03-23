@@ -103,4 +103,13 @@ body {
 /* Prevent drawer from causing scrolling issues */
 .MuiDrawer-root {
   position: fixed;
+}
+
+.MuiDrawer-root .MuiDrawer-paper {
+  overflow-y: hidden !important;
+}
+
+/* Special calendar fixes */
+.MuiGrid-root .MuiPaper-root:has(.calendar-grid) {
+  overflow: visible !important;
 } 
