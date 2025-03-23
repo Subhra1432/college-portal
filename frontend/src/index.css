@@ -18,7 +18,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  height: 100%;
+  height: auto !important;
+  overflow-y: auto !important;
 }
 
 /* Main content area should be scrollable */
@@ -28,6 +29,7 @@ body {
   max-height: none !important;
   height: auto !important; /* Ensure content can grow */
   padding-bottom: 80px !important; /* Additional padding to ensure everything is visible */
+  position: relative !important;
 }
 
 /* Fix for long content in components */
@@ -37,6 +39,8 @@ body {
   overflow-y: visible;
   padding-bottom: 24px; /* Add some bottom padding for better scroll experience */
   height: auto !important; /* Allow container to grow with content */
+  position: relative !important;
+  min-height: 100% !important;
 }
 
 /* Make tables horizontally scrollable on small screens */
@@ -237,6 +241,10 @@ body {
 .results-container {
   display: flex;
   flex-direction: column;
+  min-height: 100%;
+  height: auto !important;
+  overflow: visible !important;
+  position: relative;
 }
 
 /* Fix for Results tabs container */
@@ -244,35 +252,35 @@ body {
   display: flex !important;
   flex-direction: column !important;
   height: auto !important;
-  min-height: 500px !important;
+  min-height: auto !important;
   overflow: visible !important;
+  position: relative;
 }
 
 /* Ensure tab panels can grow */
 .results-tabs-container [role="tabpanel"] {
   flex-grow: 1 !important;
   height: auto !important;
-  min-height: 400px !important;
+  min-height: auto !important;
   overflow: visible !important;
+  position: relative;
 }
 
 /* Special fixes for the Overall Performance tab */
 .overall-performance-tab {
   height: auto !important;
-  min-height: 600px !important;
+  min-height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   position: relative !important;
-  visibility: visible !important;
   overflow: visible !important;
 }
 
 .overall-performance-tab > .MuiPaper-root {
   height: auto !important;
-  min-height: 500px !important;
+  min-height: auto !important;
   width: 100% !important;
   position: relative !important;
-  visibility: visible !important;
   overflow: visible !important;
 }
 
@@ -298,9 +306,8 @@ body {
   padding: 16px 4px !important;
   margin-top: 16px !important;
   width: 100% !important;
+  position: relative !important;
   -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(0, 0, 0, 0.3) transparent !important;
 }
 
 .grade-distribution::-webkit-scrollbar {

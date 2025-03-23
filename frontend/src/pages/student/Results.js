@@ -297,7 +297,14 @@ const Results = () => {
   }
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, pb: 8, overflow: 'visible', height: 'auto' }} className="results-container">
+    <Container maxWidth="lg" sx={{ 
+      mt: 4, 
+      mb: 4, 
+      pb: 8, 
+      overflow: 'visible', 
+      height: 'auto',
+      position: 'relative'
+    }} className="results-container">
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -309,7 +316,7 @@ const Results = () => {
         </Alert>
       </Snackbar>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ position: 'relative' }}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <AssessmentIcon sx={{ fontSize: 30, mr: 1, color: 'primary.main' }} />
@@ -609,10 +616,8 @@ const Results = () => {
                 overflow: 'visible',
                 display: selectedTab === 1 ? 'flex' : 'none',
                 flexDirection: 'column',
-                minHeight: '600px',
                 height: 'auto',
                 position: 'relative',
-                visibility: 'visible',
                 width: '100%'
               }}
               className="overall-performance-tab"
@@ -624,8 +629,7 @@ const Results = () => {
                 width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                position: 'relative',
-                visibility: 'visible'
+                position: 'relative'
               }}>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
