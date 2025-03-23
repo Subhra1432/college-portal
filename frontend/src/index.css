@@ -233,12 +233,109 @@ body {
   margin: 16px 0;
 }
 
-/* Specific fixes for Results page */
-.results-container .MuiPaper-root {
+/* Results page specific fixes */
+.results-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fix for Results tabs container */
+.results-tabs-container {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 500px !important;
   overflow: visible !important;
+}
+
+/* Ensure tab panels can grow */
+.results-tabs-container [role="tabpanel"] {
+  flex-grow: 1 !important;
+  height: auto !important;
+  min-height: 400px !important;
+  overflow: visible !important;
+}
+
+/* Special fixes for the Overall Performance tab */
+.overall-performance-tab {
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Special fixes for the Grade Distribution section */
+.overall-performance-tab .MuiGrid-container {
+  margin-top: 16px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   height: auto !important;
 }
 
+/* Enhanced styling for grade cards */
+.grade-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+  min-height: 120px !important;
+  height: 100% !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.grade-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Fix for grade card typography */
+.grade-card .MuiTypography-h4 {
+  font-size: 2rem !important;
+  margin-bottom: 8px !important;
+}
+
+.grade-card .MuiTypography-h5 {
+  font-size: 1.5rem !important;
+  margin-bottom: 4px !important;
+}
+
+/* Make better use of space in mobile view */
+@media (max-width: 600px) {
+  .results-container .MuiGrid-container .MuiGrid-item {
+    padding: 8px !important;
+  }
+  
+  .grade-card {
+    min-height: 100px !important;
+    padding: 8px !important;
+  }
+  
+  .grade-card .MuiTypography-h4 {
+    font-size: 1.5rem !important;
+  }
+  
+  .grade-card .MuiTypography-h5 {
+    font-size: 1.2rem !important;
+  }
+  
+  .results-container [role="tabpanel"] .MuiTableContainer-root {
+    max-height: 40vh !important;
+  }
+}
+
+/* Fix for custom scrollbars */
+.results-container [role="tabpanel"] {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent !important;
+}
+
+.results-container [role="tabpanel"]::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.results-container [role="tabpanel"]::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 3px !important;
+}
+
+/* Fix remaining Specific fixes for Results page */
 .results-container .MuiTableContainer-root {
   max-height: 60vh !important;
   overflow-y: auto !important;
@@ -268,48 +365,4 @@ body {
 .results-container .MuiTableCell-head {
   background-color: #f5f5f5 !important;
   font-weight: bold !important;
-}
-
-/* Specific fixes for Grade Distribution section */
-.results-container .MuiGrid-container .MuiCard-root {
-  min-height: 100px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
-}
-
-.results-container .MuiGrid-container .MuiCard-root:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Fix for Overall Performance tab */
-.results-container [value="1"] {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-}
-
-.results-container [aria-labelledby="results-tabs-1"] .MuiBox-root {
-  overflow: visible !important;
-  height: auto !important;
-}
-
-/* Fix for scrollable divs inside the Results container */
-.results-container .MuiBox-root[sx*="overflowY: 'auto'"] {
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(0, 0, 0, 0.3) transparent !important;
-}
-
-.results-container .MuiBox-root[sx*="overflowY: 'auto'"]::-webkit-scrollbar {
-  width: 6px !important;
-}
-
-.results-container .MuiBox-root[sx*="overflowY: 'auto'"]::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.3) !important;
-  border-radius: 3px !important;
-}
-
-/* Fix for dividers */
-.results-container .MuiDivider-root {
-  margin: 24px 0 !important;
 } 
