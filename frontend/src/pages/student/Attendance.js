@@ -215,7 +215,7 @@ const Attendance = () => {
   };
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }} className="attendance-container">
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -386,7 +386,7 @@ const Attendance = () => {
                   </Box>
                 </Box>
                 
-                <TableContainer sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                <TableContainer sx={{ maxHeight: '400px', overflowY: 'auto' }}>
                   <Table stickyHeader aria-label="attendance log table">
                     <TableHead>
                       <TableRow>

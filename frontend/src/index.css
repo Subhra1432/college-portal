@@ -26,6 +26,7 @@ body {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
   max-height: 100vh;
+  height: auto !important; /* Ensure content can grow */
 }
 
 /* Fix for long content in components */
@@ -34,6 +35,7 @@ body {
   overflow-x: hidden;
   overflow-y: visible;
   padding-bottom: 24px; /* Add some bottom padding for better scroll experience */
+  height: auto !important; /* Allow container to grow with content */
 }
 
 /* Make tables horizontally scrollable on small screens */
@@ -94,6 +96,13 @@ body {
   overflow-y: auto;
 }
 
+/* Fix for Attendance page container - ensure it can scroll */
+.attendance-container {
+  height: auto !important;
+  overflow-y: visible !important;
+  padding-bottom: 100px; /* Add extra padding at bottom for safety */
+}
+
 /* Fix for Payments page */
 .MuiPaper-root .MuiList-root {
   max-height: 60vh;
@@ -106,7 +115,8 @@ body {
 }
 
 .MuiDrawer-root .MuiDrawer-paper {
-  overflow-y: hidden !important;
+  overflow-y: auto !important; /* Allow drawer to scroll */
+  height: 100%;
 }
 
 /* Special calendar fixes */

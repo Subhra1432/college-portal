@@ -529,10 +529,11 @@ const MainLayout = ({ children }) => {
           width: { md: `calc(100% - ${drawerWidth}px)` },
           backgroundColor: '#f5f5f5',
           minHeight: '100vh',
-          height: '100%',
+          height: 'auto',
           overflowY: 'auto',
           overflowX: 'hidden',
           position: 'relative',
+          paddingBottom: '50px',
         }}
       >
         <Toolbar />
