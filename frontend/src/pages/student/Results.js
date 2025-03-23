@@ -591,15 +591,25 @@ const Results = () => {
                   </Typography>
                 </Box>
                 
-                <TableContainer sx={{ maxHeight: '60vh', overflowY: 'auto', border: '1px solid rgba(224, 224, 224, 1)', borderRadius: 1, mb: 4 }}>
+                <TableContainer 
+                  component={Paper} 
+                  elevation={1}
+                  sx={{ 
+                    maxHeight: '40vh', 
+                    overflowY: 'auto', 
+                    border: '1px solid rgba(224, 224, 224, 1)', 
+                    borderRadius: 1, 
+                    mb: 4 
+                  }}
+                >
                   <Table stickyHeader size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Semester</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Credits Attempted</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>SGPA</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Cumulative GPA</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: 150 }}>Semester</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold', minWidth: 120 }}>Credits Attempted</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold', minWidth: 100 }}>SGPA</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: 100 }}>Status</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', minWidth: 120 }}>Cumulative GPA</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -666,23 +676,44 @@ const Results = () => {
                     Summary of grades earned across all completed courses.
                   </Typography>
                   
-                  <Grid container spacing={2}>
-                    {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
-                      <Grid item xs={6} sm={4} md={2} key={grade}>
-                        <Card elevation={2} sx={{ textAlign: 'center', p: 1 }}>
-                          <Typography variant="h5" sx={{ color: getGradeColor(grade) }}>
-                            {grade}
-                          </Typography>
-                          <Typography variant="h6">
-                            {count || 0}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            courses
-                          </Typography>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
+                  <Box sx={{ maxHeight: '50vh', overflowY: 'auto', pr: 1, pb: 2 }}>
+                    <Grid container spacing={2}>
+                      {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
+                        grade && (
+                          <Grid item xs={6} sm={4} md={2} key={grade}>
+                            <Card 
+                              elevation={2} 
+                              sx={{ 
+                                textAlign: 'center', 
+                                p: 1,
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <Typography 
+                                variant="h5" 
+                                sx={{ 
+                                  color: getGradeColor(grade),
+                                  fontWeight: 'bold',
+                                  mb: 1
+                                }}
+                              >
+                                {grade}
+                              </Typography>
+                              <Typography variant="h6" sx={{ mb: 0.5 }}>
+                                {count || 0}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                courses
+                              </Typography>
+                            </Card>
+                          </Grid>
+                        )
+                      ))}
+                    </Grid>
+                  </Box>
                 </Box>
                 
                 <Box sx={{ textAlign: 'center', mt: 4 }}>
