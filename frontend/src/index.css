@@ -100,18 +100,21 @@ body {
 }
 
 /* Optimize table row height to show more content */
-.attendance-container .MuiTableRow-root {
+.attendance-container .MuiTableRow-root,
+.results-container .MuiTableRow-root {
   height: 40px !important; /* Further reduced height to fit more rows */
 }
 
-.attendance-container .MuiTableCell-root {
+.attendance-container .MuiTableCell-root,
+.results-container .MuiTableCell-root {
   padding: 6px 12px !important; /* Further reduced padding */
   height: auto !important;
   white-space: nowrap;
 }
 
 /* Fix for Attendance page container - ensure it can scroll */
-.attendance-container {
+.attendance-container,
+.results-container {
   height: auto !important;
   overflow: visible !important;
   padding-bottom: 100px !important; /* Add extra padding at bottom for safety */
@@ -120,14 +123,16 @@ body {
 }
 
 /* Make sure papers in attendance page can grow */
-.attendance-container .MuiPaper-root {
+.attendance-container .MuiPaper-root,
+.results-container .MuiPaper-root {
   height: auto !important;
   overflow: visible !important;
   margin-bottom: 16px;
 }
 
 /* Fix for table in Monthly Stats tab */
-.attendance-container [role="tabpanel"] .MuiTableContainer-root {
+.attendance-container [role="tabpanel"] .MuiTableContainer-root,
+.results-container [role="tabpanel"] .MuiTableContainer-root {
   max-height: 60vh !important; /* Increased height for more visible rows */
   margin-top: 16px;
   border: 1px solid rgba(224, 224, 224, 1);
@@ -194,18 +199,21 @@ body {
 }
 
 /* Fix for content loading and error states */
-.attendance-container .MuiCircularProgress-root:not(.progress-container .MuiCircularProgress-root) {
+.attendance-container .MuiCircularProgress-root:not(.progress-container .MuiCircularProgress-root),
+.results-container .MuiCircularProgress-root {
   position: relative !important;
 }
 
 /* Ensure tabs can be properly highlighted */
-.attendance-container .MuiTabs-root {
+.attendance-container .MuiTabs-root,
+.results-container .MuiTabs-root {
   width: 100% !important;
 }
 
 /* Fix for small screens - adjust layout */
 @media (max-width: 600px) {
-  .attendance-container .MuiGrid-container {
+  .attendance-container .MuiGrid-container,
+  .results-container .MuiGrid-container {
     padding: 0 !important;
   }
   
@@ -223,4 +231,41 @@ body {
   color: #721c24;
   border-radius: 4px;
   margin: 16px 0;
+}
+
+/* Specific fixes for Results page */
+.results-container .MuiPaper-root {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+.results-container .MuiTableContainer-root {
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+}
+
+.results-container .MuiTable-stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.results-container .MuiChip-root {
+  height: 24px !important;
+  font-size: 0.75rem !important;
+}
+
+.results-container .MuiGrid-container .MuiCard-root {
+  height: 100% !important;
+}
+
+/* Fix vertical space usage in cards */
+.results-container .MuiCardContent-root {
+  padding: 16px !important;
+}
+
+/* Ensure table headers are visible */
+.results-container .MuiTableCell-head {
+  background-color: #f5f5f5 !important;
+  font-weight: bold !important;
 } 

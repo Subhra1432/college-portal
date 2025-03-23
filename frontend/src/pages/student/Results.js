@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Container,
@@ -25,6 +25,9 @@ import {
   LinearProgress,
   IconButton,
   Chip,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   Assessment as AssessmentIcon,
@@ -115,25 +118,75 @@ const MOCK_RESULTS = {
 };
 
 const Results = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth || {});
   const [selectedTab, setSelectedTab] = useState(0);
-  const [selectedSemester, setSelectedSemester] = useState(MOCK_RESULTS.currentSemester);
+  const [resultsData, setResultsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSemester, setSelectedSemester] = useState(3); // Default to semester 3
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
+  
+  // Simulate data loading and handle any initialization errors
+  useEffect(() => {
+    try {
+      // Simulate API call with timeout
+      const timer = setTimeout(() => {
+        setResultsData(MOCK_RESULTS);
+        setSelectedSemester(MOCK_RESULTS.student?.currentSemester || 3);
+        setLoading(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    } catch (error) {
+      console.error("Error loading results data:", error);
+      setSnackbar({
+        open: true,
+        message: "Error loading results data. Please refresh the page.",
+        severity: "error"
+      });
+      setLoading(false);
+    }
+  }, []);
   
   const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
+    try {
+      setSelectedTab(newValue);
+    } catch (error) {
+      console.error("Error changing tabs:", error);
+      setSnackbar({
+        open: true,
+        message: "Error changing tabs. Please try again.",
+        severity: "error"
+      });
+    }
   };
   
   const handleSemesterChange = (event) => {
-    setSelectedSemester(event.target.value);
+    try {
+      setSelectedSemester(event.target.value);
+    } catch (error) {
+      console.error("Error changing semester:", error);
+      setSnackbar({
+        open: true,
+        message: "Error changing semester. Please try again.",
+        severity: "error"
+      });
+    }
   };
   
-  // Get the currently selected semester data
-  const currentSemesterData = MOCK_RESULTS.semesters.find(
-    semester => semester.semesterNumber === selectedSemester
-  );
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
   
   // Functions to get grade color
   const getGradeColor = (grade) => {
+    if (!grade) return 'text.primary';
     if (grade.startsWith('A')) return 'success.main';
     if (grade.startsWith('B')) return 'info.main';
     if (grade.startsWith('C')) return 'warning.main';
@@ -142,18 +195,30 @@ const Results = () => {
   
   // Format semester title
   const formatSemesterTitle = (semester) => {
-    return `Semester ${semester.semesterNumber} (${semester.term} ${semester.year})`;
+    if (!semester) return 'Unknown Semester';
+    return `Semester ${semester.semesterNumber} (${semester.term || 'Unknown'} ${semester.year || 'Unknown'})`;
   };
   
   // Calculate total credits and total points for a semester
   const calculateSemesterTotals = (semester) => {
-    const totalCredits = semester.courses.reduce((sum, course) => sum + course.credits, 0);
-    const totalPoints = semester.courses.reduce((sum, course) => sum + (course.credits * course.points), 0);
-    return { totalCredits, totalPoints };
+    try {
+      if (!semester || !semester.courses) {
+        return { totalCredits: 0, totalPoints: 0 };
+      }
+      
+      const totalCredits = semester.courses.reduce((sum, course) => sum + (course.credits || 0), 0);
+      const totalPoints = semester.courses.reduce((sum, course) => sum + ((course.credits || 0) * (course.points || 0)), 0);
+      return { totalCredits, totalPoints };
+    } catch (error) {
+      console.error("Error calculating semester totals:", error);
+      return { totalCredits: 0, totalPoints: 0 };
+    }
   };
   
   // Get grade description
   const getGradeDescription = (grade) => {
+    if (!grade) return '';
+    
     const descriptions = {
       'A+': 'Outstanding',
       'A': 'Excellent',
@@ -171,20 +236,79 @@ const Results = () => {
   
   // Get semester performance trend
   const getSemesterTrend = () => {
-    if (MOCK_RESULTS.semesters.length < 2) return 'neutral';
-    
-    const lastTwoSemesters = MOCK_RESULTS.semesters.slice(-2);
-    const diff = lastTwoSemesters[1].sgpa - lastTwoSemesters[0].sgpa;
-    
-    if (diff > 0.2) return 'up';
-    if (diff < -0.2) return 'down';
-    return 'neutral';
+    try {
+      if (!resultsData || !resultsData.semesters || resultsData.semesters.length < 2) {
+        return 'neutral';
+      }
+      
+      const lastTwoSemesters = resultsData.semesters.slice(-2);
+      if (!lastTwoSemesters[0].sgpa || !lastTwoSemesters[1].sgpa) {
+        return 'neutral';
+      }
+      
+      const diff = lastTwoSemesters[1].sgpa - lastTwoSemesters[0].sgpa;
+      
+      if (diff > 0.2) return 'up';
+      if (diff < -0.2) return 'down';
+      return 'neutral';
+    } catch (error) {
+      console.error("Error calculating semester trend:", error);
+      return 'neutral';
+    }
+  };
+  
+  // Get the currently selected semester data
+  const getCurrentSemesterData = () => {
+    try {
+      if (!resultsData || !resultsData.semesters) {
+        return null;
+      }
+      
+      return resultsData.semesters.find(
+        semester => semester.semesterNumber === selectedSemester
+      );
+    } catch (error) {
+      console.error("Error getting current semester data:", error);
+      return null;
+    }
   };
   
   const semesterTrend = getSemesterTrend();
+  const currentSemesterData = getCurrentSemesterData();
+  
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ ml: 2 }}>Loading results data...</Typography>
+      </Container>
+    );
+  }
+  
+  if (!resultsData) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" color="error">Failed to load results data</Typography>
+          <Typography variant="body1">Please refresh the page or try again later</Typography>
+        </Paper>
+      </Container>
+    );
+  }
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, pb: 8, overflow: 'visible', height: 'auto' }} className="results-container">
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -215,7 +339,7 @@ const Results = () => {
                 </Typography>
               </Box>
               <Typography variant="h3" component="div" gutterBottom>
-                {MOCK_RESULTS.currentCGPA.toFixed(2)}
+                {(resultsData.currentCGPA || 0).toFixed(2)}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 {semesterTrend === 'up' && <TrendingUpIcon color="inherit" sx={{ mr: 0.5 }} />}
@@ -249,19 +373,19 @@ const Results = () => {
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {MOCK_RESULTS.overallProgress.completionPercentage.toFixed(1)}% Completed
+                  {((resultsData.overallProgress?.completionPercentage) || 0).toFixed(1)}% Completed
                 </Typography>
                 <LinearProgress 
                   variant="determinate" 
-                  value={MOCK_RESULTS.overallProgress.completionPercentage} 
+                  value={(resultsData.overallProgress?.completionPercentage) || 0} 
                   sx={{ height: 10, borderRadius: 5 }}
                 />
               </Box>
               <Typography variant="body2">
-                <strong>{MOCK_RESULTS.overallProgress.totalCreditsPassed}</strong> of <strong>{MOCK_RESULTS.overallProgress.totalCreditsRequired}</strong> credits completed
+                <strong>{resultsData.overallProgress?.totalCreditsPassed || 0}</strong> of <strong>{resultsData.overallProgress?.totalCreditsRequired || 0}</strong> credits completed
               </Typography>
               <Typography variant="body2">
-                <strong>{MOCK_RESULTS.overallProgress.currentCredits}</strong> credits in progress
+                <strong>{resultsData.overallProgress?.currentCredits || 0}</strong> credits in progress
               </Typography>
             </CardContent>
           </Card>
@@ -289,19 +413,19 @@ const Results = () => {
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 <Chip 
                   icon={<StarIcon />} 
-                  label={`${MOCK_RESULTS.gradeDistribution['A+']} A+ Grades`} 
+                  label={`${resultsData.gradeDistribution?.['A+'] || 0} A+ Grades`} 
                   color="success" 
                   size="small" 
                 />
                 <Chip 
                   icon={<StarIcon />} 
-                  label={`${MOCK_RESULTS.gradeDistribution['A']} A Grades`} 
+                  label={`${resultsData.gradeDistribution?.['A'] || 0} A Grades`} 
                   color="success" 
                   size="small" 
                 />
                 <Chip 
                   icon={<StarIcon />} 
-                  label={`${MOCK_RESULTS.gradeDistribution['A-']} A- Grades`} 
+                  label={`${resultsData.gradeDistribution?.['A-'] || 0} A- Grades`} 
                   color="success" 
                   size="small" 
                 />
@@ -312,14 +436,21 @@ const Results = () => {
         
         {/* Tabs for Semester Results and Performance */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-            <Tabs value={selectedTab} onChange={handleTabChange} sx={{ mb: 3 }}>
-              <Tab label="Semester Results" icon={<AssessmentIcon />} iconPosition="start" />
-              <Tab label="Overall Performance" icon={<TimelineIcon />} iconPosition="start" />
-            </Tabs>
+          <Paper elevation={3} sx={{ p: 3, overflow: 'visible', height: 'auto' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+              <Tabs 
+                value={selectedTab} 
+                onChange={handleTabChange} 
+                variant="fullWidth"
+                aria-label="results tabs"
+              >
+                <Tab label="Semester Results" icon={<AssessmentIcon />} iconPosition="start" />
+                <Tab label="Overall Performance" icon={<TimelineIcon />} iconPosition="start" />
+              </Tabs>
+            </Box>
             
             {selectedTab === 0 && (
-              <>
+              <Box sx={{ overflow: 'visible', height: 'auto' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                   <FormControl sx={{ minWidth: 250 }}>
                     <InputLabel>Select Semester</InputLabel>
@@ -328,7 +459,7 @@ const Results = () => {
                       onChange={handleSemesterChange}
                       label="Select Semester"
                     >
-                      {MOCK_RESULTS.semesters.map((semester) => (
+                      {(resultsData.semesters || []).map((semester) => (
                         <MenuItem key={semester.semesterNumber} value={semester.semesterNumber}>
                           {formatSemesterTitle(semester)}
                         </MenuItem>
@@ -337,16 +468,36 @@ const Results = () => {
                   </FormControl>
                   
                   <Box>
-                    <IconButton color="primary" title="Print Results">
+                    <IconButton 
+                      color="primary" 
+                      title="Print Results"
+                      onClick={() => {
+                        setSnackbar({
+                          open: true,
+                          message: "Print functionality will be available soon.",
+                          severity: "info"
+                        });
+                      }}
+                    >
                       <PrintIcon />
                     </IconButton>
-                    <IconButton color="primary" title="Download Results">
+                    <IconButton 
+                      color="primary" 
+                      title="Download Results"
+                      onClick={() => {
+                        setSnackbar({
+                          open: true,
+                          message: "Download functionality will be available soon.",
+                          severity: "info"
+                        });
+                      }}
+                    >
                       <DownloadIcon />
                     </IconButton>
                   </Box>
                 </Box>
                 
-                {currentSemesterData && (
+                {currentSemesterData ? (
                   <>
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="h6">
@@ -354,37 +505,37 @@ const Results = () => {
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
                         <Chip 
-                          label={`SGPA: ${currentSemesterData.sgpa.toFixed(2)}`} 
+                          label={`SGPA: ${(currentSemesterData.sgpa || 0).toFixed(2)}`} 
                           color="primary" 
                         />
                         <Chip 
-                          label={`Status: ${currentSemesterData.status}`} 
+                          label={`Status: ${currentSemesterData.status || 'Unknown'}`} 
                           color={currentSemesterData.status === 'Completed' ? 'success' : 'info'} 
                         />
                       </Box>
                     </Box>
                     
-                    <TableContainer>
-                      <Table>
+                    <TableContainer sx={{ maxHeight: '60vh', overflowY: 'auto', border: '1px solid rgba(224, 224, 224, 1)', borderRadius: 1, mb: 3 }}>
+                      <Table stickyHeader size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell>Course Code</TableCell>
-                            <TableCell>Course Name</TableCell>
-                            <TableCell align="center">Credits</TableCell>
-                            <TableCell align="center">Grade</TableCell>
-                            <TableCell>Grade Points</TableCell>
-                            <TableCell align="right">Credit Points</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Course Code</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Course Name</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Credits</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Grade</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Grade Points</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>Credit Points</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {currentSemesterData.courses.map((course) => (
-                            <TableRow key={course.code}>
-                              <TableCell>{course.code}</TableCell>
-                              <TableCell>{course.name}</TableCell>
-                              <TableCell align="center">{course.credits}</TableCell>
+                          {(currentSemesterData.courses || []).map((course) => (
+                            <TableRow key={course.code} hover>
+                              <TableCell>{course.code || ''}</TableCell>
+                              <TableCell>{course.name || ''}</TableCell>
+                              <TableCell align="center">{course.credits || 0}</TableCell>
                               <TableCell align="center">
                                 <Chip 
-                                  label={course.grade} 
+                                  label={course.grade || 'N/A'} 
                                   size="small" 
                                   sx={{ 
                                     bgcolor: getGradeColor(course.grade),
@@ -393,8 +544,8 @@ const Results = () => {
                                   }} 
                                 />
                               </TableCell>
-                              <TableCell>{course.points} - {getGradeDescription(course.grade)}</TableCell>
-                              <TableCell align="right">{course.credits * course.points}</TableCell>
+                              <TableCell>{(course.points || 0)} - {getGradeDescription(course.grade)}</TableCell>
+                              <TableCell align="right">{(course.credits || 0) * (course.points || 0)}</TableCell>
                             </TableRow>
                           ))}
                           
@@ -402,7 +553,7 @@ const Results = () => {
                           <TableRow sx={{ '& td': { fontWeight: 'bold', bgcolor: 'rgba(0, 0, 0, 0.04)' } }}>
                             <TableCell colSpan={2}>Semester Totals</TableCell>
                             <TableCell align="center">{calculateSemesterTotals(currentSemesterData).totalCredits}</TableCell>
-                            <TableCell align="center">SGPA: {currentSemesterData.sgpa.toFixed(2)}</TableCell>
+                            <TableCell align="center">SGPA: {(currentSemesterData.sgpa || 0).toFixed(2)}</TableCell>
                             <TableCell>-</TableCell>
                             <TableCell align="right">{calculateSemesterTotals(currentSemesterData).totalPoints}</TableCell>
                           </TableRow>
@@ -419,12 +570,18 @@ const Results = () => {
                       </Typography>
                     </Box>
                   </>
+                ) : (
+                  <Box className="no-data-alert">
+                    <Typography variant="body1" color="error">
+                      No data available for the selected semester
+                    </Typography>
+                  </Box>
                 )}
-              </>
+              </Box>
             )}
             
             {selectedTab === 1 && (
-              <>
+              <Box sx={{ overflow: 'visible', height: 'auto' }}>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     Cumulative Performance
@@ -434,49 +591,59 @@ const Results = () => {
                   </Typography>
                 </Box>
                 
-                <TableContainer sx={{ mb: 4 }}>
-                  <Table>
+                <TableContainer sx={{ maxHeight: '60vh', overflowY: 'auto', border: '1px solid rgba(224, 224, 224, 1)', borderRadius: 1, mb: 4 }}>
+                  <Table stickyHeader size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Semester</TableCell>
-                        <TableCell align="center">Credits Attempted</TableCell>
-                        <TableCell align="center">SGPA</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell align="right">Cumulative GPA</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Semester</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Credits Attempted</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>SGPA</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Cumulative GPA</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {MOCK_RESULTS.semesters.map((semester, index) => {
-                        // Calculate running CGPA
-                        const runningCGPA = MOCK_RESULTS.semesters
-                          .slice(0, index + 1)
-                          .reduce((total, sem, i, array) => {
-                            const weight = calculateSemesterTotals(sem).totalCredits;
-                            return total + (sem.sgpa * weight);
-                          }, 0) / 
-                          MOCK_RESULTS.semesters
-                            .slice(0, index + 1)
-                            .reduce((total, sem) => total + calculateSemesterTotals(sem).totalCredits, 0);
+                      {(resultsData.semesters || []).map((semester, index) => {
+                        // Calculate running CGPA using IIFE to handle any errors
+                        const runningCGPA = (() => {
+                          try {
+                            if (!resultsData.semesters) return 0;
+                            
+                            const semestersToConsider = resultsData.semesters.slice(0, index + 1);
+                            const totalWeightedPoints = semestersToConsider.reduce((total, sem) => {
+                              const weight = calculateSemesterTotals(sem).totalCredits;
+                              return total + ((sem.sgpa || 0) * weight);
+                            }, 0);
+                            
+                            const totalCredits = semestersToConsider.reduce((total, sem) => 
+                              total + calculateSemesterTotals(sem).totalCredits, 0);
+                              
+                            return totalCredits > 0 ? totalWeightedPoints / totalCredits : 0;
+                          } catch (error) {
+                            console.error("Error calculating running CGPA:", error);
+                            return 0;
+                          }
+                        })();
                             
                         return (
-                          <TableRow key={semester.semesterNumber}>
+                          <TableRow key={semester.semesterNumber} hover>
                             <TableCell>{formatSemesterTitle(semester)}</TableCell>
                             <TableCell align="center">{calculateSemesterTotals(semester).totalCredits}</TableCell>
                             <TableCell align="center">
                               <Chip 
-                                label={semester.sgpa.toFixed(2)} 
+                                label={(semester.sgpa || 0).toFixed(2)} 
                                 size="small" 
                                 color={
-                                  semester.sgpa >= 9 ? 'success' : 
-                                  semester.sgpa >= 8 ? 'primary' : 
-                                  semester.sgpa >= 7 ? 'info' : 
-                                  semester.sgpa >= 6 ? 'warning' : 'error'
+                                  (semester.sgpa || 0) >= 9 ? 'success' : 
+                                  (semester.sgpa || 0) >= 8 ? 'primary' : 
+                                  (semester.sgpa || 0) >= 7 ? 'info' : 
+                                  (semester.sgpa || 0) >= 6 ? 'warning' : 'error'
                                 } 
                               />
                             </TableCell>
                             <TableCell>
                               <Chip 
-                                label={semester.status} 
+                                label={semester.status || 'Unknown'} 
                                 size="small" 
                                 color={semester.status === 'Completed' ? 'success' : 'info'} 
                               />
@@ -491,7 +658,7 @@ const Results = () => {
                 
                 <Divider sx={{ my: 3 }} />
                 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 3, overflow: 'visible', height: 'auto' }}>
                   <Typography variant="h6" gutterBottom>
                     Grade Distribution
                   </Typography>
@@ -500,14 +667,14 @@ const Results = () => {
                   </Typography>
                   
                   <Grid container spacing={2}>
-                    {Object.entries(MOCK_RESULTS.gradeDistribution).map(([grade, count]) => (
+                    {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
                       <Grid item xs={6} sm={4} md={2} key={grade}>
                         <Card elevation={2} sx={{ textAlign: 'center', p: 1 }}>
                           <Typography variant="h5" sx={{ color: getGradeColor(grade) }}>
                             {grade}
                           </Typography>
                           <Typography variant="h6">
-                            {count}
+                            {count || 0}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             courses
@@ -523,11 +690,18 @@ const Results = () => {
                     variant="contained" 
                     color="primary" 
                     startIcon={<DownloadIcon />}
+                    onClick={() => {
+                      setSnackbar({
+                        open: true,
+                        message: "Download functionality will be available soon.",
+                        severity: "info"
+                      });
+                    }}
                   >
                     Download Complete Transcript
                   </Button>
                 </Box>
-              </>
+              </Box>
             )}
           </Paper>
         </Grid>
