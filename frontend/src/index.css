@@ -279,19 +279,14 @@ body {
 /* Special fixes for the Grade Distribution section */
 .overall-performance-tab .MuiGrid-container {
   margin-top: 16px !important;
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-  gap: 16px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   width: 100% !important;
-  position: static !important;
 }
 
 /* Ensure grid items display properly */
 .overall-performance-tab .MuiGrid-container .MuiGrid-item {
-  display: block !important;
-  position: static !important;
-  padding: 0 !important;
-  width: 100% !important;
+  padding: 8px !important;
 }
 
 /* Enhanced styling for grade cards */
@@ -301,8 +296,6 @@ body {
   height: 100% !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  position: static !important;
-  overflow: visible !important;
 }
 
 .grade-card:hover {

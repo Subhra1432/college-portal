@@ -728,15 +728,11 @@ const Results = () => {
                   
                   <Grid container spacing={2} sx={{ 
                     mt: 2,
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                    gap: '16px',
-                    width: '100%',
-                    position: 'static'
+                    width: '100%'
                   }}>
                     {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
                       grade && (
-                        <Grid item key={grade} sx={{ display: 'block', position: 'static' }}>
+                        <Grid item xs={6} sm={4} md={3} lg={2} key={grade}>
                           <Card 
                             elevation={2} 
                             sx={{ 
@@ -747,8 +743,7 @@ const Results = () => {
                               display: 'flex',
                               flexDirection: 'column',
                               justifyContent: 'center',
-                              alignItems: 'center',
-                              position: 'static'
+                              alignItems: 'center'
                             }}
                             className="grade-card"
                           >
