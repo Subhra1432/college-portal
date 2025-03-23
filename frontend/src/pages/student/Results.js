@@ -607,13 +607,26 @@ const Results = () => {
               sx={{ 
                 flexGrow: 1, 
                 overflow: 'visible',
-                display: selectedTab === 1 ? 'block' : 'none',
+                display: selectedTab === 1 ? 'flex' : 'none',
+                flexDirection: 'column',
                 minHeight: '600px',
-                height: 'auto'
+                height: 'auto',
+                position: 'relative',
+                visibility: 'visible',
+                width: '100%'
               }}
               className="overall-performance-tab"
             >
-              <Paper elevation={0} sx={{ p: 0, overflow: 'visible', height: 'auto' }}>
+              <Paper elevation={0} sx={{ 
+                p: 0, 
+                overflow: 'visible', 
+                height: 'auto',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
+                visibility: 'visible'
+              }}>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     Cumulative Performance
@@ -631,10 +644,14 @@ const Results = () => {
                       maxHeight: '300px', 
                       overflowY: 'auto', 
                       border: '1px solid rgba(224, 224, 224, 1)', 
-                      borderRadius: 1
+                      borderRadius: 1,
+                      position: 'relative',
+                      visibility: 'visible',
+                      width: '100%',
+                      zIndex: 1
                     }}
                   >
-                    <Table stickyHeader size="small">
+                    <Table stickyHeader size="small" sx={{ visibility: 'visible', position: 'relative' }}>
                       <TableHead>
                         <TableRow>
                           <TableCell sx={{ fontWeight: 'bold', minWidth: 180 }}>Semester</TableCell>
@@ -709,7 +726,14 @@ const Results = () => {
                     Summary of grades earned across all completed courses.
                   </Typography>
                   
-                  <Grid container spacing={2} sx={{ mt: 2 }}>
+                  <Grid container spacing={2} sx={{ 
+                    mt: 2, 
+                    position: 'relative',
+                    visibility: 'visible',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    width: '100%'
+                  }}>
                     {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
                       grade && (
                         <Grid item xs={6} sm={4} md={2} key={grade}>

@@ -259,8 +259,21 @@ body {
 /* Special fixes for the Overall Performance tab */
 .overall-performance-tab {
   height: auto !important;
+  min-height: 600px !important;
   display: flex !important;
   flex-direction: column !important;
+  position: relative !important;
+  visibility: visible !important;
+  overflow: visible !important;
+}
+
+.overall-performance-tab > .MuiPaper-root {
+  height: auto !important;
+  min-height: 500px !important;
+  width: 100% !important;
+  position: relative !important;
+  visibility: visible !important;
+  overflow: visible !important;
 }
 
 /* Special fixes for the Grade Distribution section */
@@ -339,6 +352,9 @@ body {
 .results-container .MuiTableContainer-root {
   max-height: 60vh !important;
   overflow-y: auto !important;
+  visibility: visible !important;
+  position: relative !important; 
+  z-index: 1;
 }
 
 .results-container .MuiTable-stickyHeader {
