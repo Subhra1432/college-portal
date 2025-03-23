@@ -112,4 +112,28 @@ body {
 /* Special calendar fixes */
 .MuiGrid-root .MuiPaper-root:has(.calendar-grid) {
   overflow: visible !important;
+}
+
+/* Fix for Attendance page's circular progress */
+.MuiCircularProgress-root {
+  transform-origin: center;
+}
+
+.MuiCard-root .MuiCircularProgress-root {
+  position: absolute;
+}
+
+/* Attendance card fixes */
+.attendance-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.attendance-card .progress-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 16px auto;
 } 

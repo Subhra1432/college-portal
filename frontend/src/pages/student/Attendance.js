@@ -245,12 +245,14 @@ const Attendance = () => {
         
         {/* Attendance Summary Cards */}
         <Grid item xs={12}>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
             {MOCK_ATTENDANCE_DATA.attendanceBySubject.map(subject => (
-              <Grid item xs={12} sm={6} md={3} key={subject.id}>
+              <Grid item xs={12} sm={6} md={3} key={subject.id} sx={{ display: 'flex' }}>
                 <Card
+                  className="attendance-card"
                   sx={{
                     height: '100%',
+                    width: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'relative',
@@ -259,25 +261,25 @@ const Attendance = () => {
                     border: subject.percentage < 75 ? '1px solid #ff4d4f' : 'none',
                   }}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
+                  <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
                     <Typography 
                       variant="subtitle1" 
                       component="div" 
                       gutterBottom 
                       noWrap 
                       title={subject.subject}
-                      sx={{ fontWeight: 'bold' }}
+                      sx={{ fontWeight: 'bold', textAlign: 'center', mb: 2, width: '100%' }}
                     >
                       {subject.subject}
                     </Typography>
                     
-                    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', my: 2 }}>
+                    <Box className="progress-container" sx={{ position: 'relative', display: 'flex', justifyContent: 'center', my: 2, height: 80, width: 80, margin: '0 auto' }}>
                       <CircularProgress
                         variant="determinate"
                         value={100}
                         size={80}
                         thickness={4}
-                        sx={{ color: 'grey.300', position: 'absolute' }}
+                        sx={{ color: 'grey.300', position: 'absolute', left: 0, top: 0 }}
                       />
                       <CircularProgress
                         variant="determinate"
@@ -287,6 +289,8 @@ const Attendance = () => {
                         sx={{
                           color: subject.percentage >= 75 ? 'success.main' : 'error.main',
                           position: 'absolute',
+                          left: 0,
+                          top: 0,
                         }}
                       />
                       <Box
@@ -307,12 +311,12 @@ const Attendance = () => {
                       </Box>
                     </Box>
                     
-                    <Typography variant="body2" color="text.secondary" align="center">
+                    <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2, width: '100%' }}>
                       {subject.attended} of {subject.total} classes attended
                     </Typography>
                     
                     {subject.percentage < 75 && (
-                      <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+                      <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1, textAlign: 'center', width: '100%' }}>
                         Attendance below requirement!
                       </Typography>
                     )}
@@ -326,10 +330,17 @@ const Attendance = () => {
         {/* Tabs for different attendance views */}
         <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 3 }}>
-            <Tabs value={selectedTab} onChange={handleTabChange} sx={{ mb: 3 }}>
-              <Tab label="Attendance Log" icon={<EventIcon />} iconPosition="start" />
-              <Tab label="Monthly Stats" icon={<DateRangeIcon />} iconPosition="start" />
-            </Tabs>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs 
+                value={selectedTab} 
+                onChange={handleTabChange} 
+                variant="fullWidth"
+                aria-label="attendance tabs"
+              >
+                <Tab label="Attendance Log" icon={<EventIcon />} iconPosition="start" />
+                <Tab label="Monthly Stats" icon={<DateRangeIcon />} iconPosition="start" />
+              </Tabs>
+            </Box>
             
             {selectedTab === 0 && (
               <>
@@ -375,14 +386,14 @@ const Attendance = () => {
                   </Box>
                 </Box>
                 
-                <TableContainer>
-                  <Table>
+                <TableContainer sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                  <Table stickyHeader aria-label="attendance log table">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Date</TableCell>
-                        {selectedSubject === 'all' && <TableCell>Subject</TableCell>}
-                        <TableCell>Topic</TableCell>
-                        <TableCell align="center">Status</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                        {selectedSubject === 'all' && <TableCell sx={{ fontWeight: 'bold' }}>Subject</TableCell>}
+                        <TableCell sx={{ fontWeight: 'bold' }}>Topic</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Status</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
