@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Container,
@@ -175,15 +175,38 @@ const MOCK_ATTENDANCE_DATA = {
 };
 
 const Attendance = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth || {});
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [attendanceData, setAttendanceData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'info'
   });
+  
+  // Simulate data loading and handle any initialization errors
+  useEffect(() => {
+    try {
+      // Simulate API call with timeout
+      const timer = setTimeout(() => {
+        setAttendanceData(MOCK_ATTENDANCE_DATA);
+        setLoading(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    } catch (error) {
+      console.error("Error loading attendance data:", error);
+      setSnackbar({
+        open: true,
+        message: "Error loading attendance data. Please refresh the page.",
+        severity: "error"
+      });
+      setLoading(false);
+    }
+  }, []);
   
   const handleTabChange = (event, newValue) => {
     try {
@@ -271,15 +294,19 @@ const Attendance = () => {
   // Filter classes based on selected subject
   const getFilteredClasses = () => {
     try {
+      if (!attendanceData || !attendanceData.attendanceBySubject) {
+        return [];
+      }
+      
       if (selectedSubject === 'all') {
-        return MOCK_ATTENDANCE_DATA.attendanceBySubject.flatMap(subject => 
-          subject.classes.map(cls => ({ ...cls, subject: subject.subject }))
+        return attendanceData.attendanceBySubject.flatMap(subject => 
+          (subject.classes || []).map(cls => ({ ...cls, subject: subject.subject }))
         ).sort((a, b) => new Date(b.date) - new Date(a.date));
       } else {
-        const subjectData = MOCK_ATTENDANCE_DATA.attendanceBySubject.find(
+        const subjectData = attendanceData.attendanceBySubject.find(
           subject => subject.id === parseInt(selectedSubject)
         );
-        return subjectData ? subjectData.classes.map(cls => ({ ...cls, subject: subjectData.subject }))
+        return subjectData ? (subjectData.classes || []).map(cls => ({ ...cls, subject: subjectData.subject }))
           .sort((a, b) => new Date(b.date) - new Date(a.date)) : [];
       }
     } catch (error) {
@@ -296,16 +323,12 @@ const Attendance = () => {
   // Apply search filter
   const filteredClasses = getFilteredClasses().filter(cls => {
     try {
-      return cls.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cls.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cls.date.includes(searchTerm);
+      if (!cls) return false;
+      return (cls.subject || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+        (cls.topic || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+        (cls.date || '').includes(searchTerm || '');
     } catch (error) {
       console.error("Error applying search filter:", error);
-      setSnackbar({
-        open: true,
-        message: "Error searching attendance data. Please try again.",
-        severity: "error"
-      });
       return true; // Return all classes if there's an error
     }
   });
@@ -320,6 +343,26 @@ const Attendance = () => {
       return dateString; // Return original string if formatting fails
     }
   };
+  
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ ml: 2 }}>Loading attendance data...</Typography>
+      </Container>
+    );
+  }
+  
+  if (!attendanceData) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" color="error">Failed to load attendance data</Typography>
+          <Typography variant="body1">Please refresh the page or try again later</Typography>
+        </Paper>
+      </Container>
+    );
+  }
   
   return (
     <Container 
@@ -365,10 +408,10 @@ const Attendance = () => {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              Current Semester: {MOCK_ATTENDANCE_DATA.currentSemester}
+              Current Semester: {attendanceData.currentSemester || 'Current Semester'}
             </Typography>
             <Typography variant="body1">
-              Your overall attendance for this semester is {MOCK_ATTENDANCE_DATA.overallAttendance}%
+              Your overall attendance for this semester is {attendanceData.overallAttendance || 0}%
             </Typography>
           </Paper>
         </Grid>
@@ -376,7 +419,7 @@ const Attendance = () => {
         {/* Attendance Summary Cards */}
         <Grid item xs={12}>
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            {MOCK_ATTENDANCE_DATA.attendanceBySubject.map(subject => (
+            {(attendanceData.attendanceBySubject || []).map(subject => (
               <Grid item xs={12} sm={6} md={3} key={subject.id} sx={{ display: 'flex' }}>
                 <Card
                   className="attendance-card"
@@ -387,8 +430,8 @@ const Attendance = () => {
                     flexDirection: 'column',
                     position: 'relative',
                     overflow: 'visible',
-                    boxShadow: subject.percentage < 75 ? '0 4px 20px rgba(255, 77, 79, 0.2)' : '0 4px 20px rgba(0, 0, 0, 0.1)',
-                    border: subject.percentage < 75 ? '1px solid #ff4d4f' : 'none',
+                    boxShadow: (subject.percentage || 0) < 75 ? '0 4px 20px rgba(255, 77, 79, 0.2)' : '0 4px 20px rgba(0, 0, 0, 0.1)',
+                    border: (subject.percentage || 0) < 75 ? '1px solid #ff4d4f' : 'none',
                   }}
                 >
                   <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
@@ -400,7 +443,7 @@ const Attendance = () => {
                       title={subject.subject}
                       sx={{ fontWeight: 'bold', textAlign: 'center', mb: 2, width: '100%' }}
                     >
-                      {subject.subject}
+                      {subject.subject || 'Unknown Subject'}
                     </Typography>
                     
                     <Box className="progress-container" sx={{ position: 'relative', display: 'flex', justifyContent: 'center', my: 2, height: 80, width: 80, margin: '0 auto' }}>
@@ -413,11 +456,11 @@ const Attendance = () => {
                       />
                       <CircularProgress
                         variant="determinate"
-                        value={subject.percentage}
+                        value={subject.percentage || 0}
                         size={80}
                         thickness={4}
                         sx={{
-                          color: subject.percentage >= 75 ? 'success.main' : 'error.main',
+                          color: (subject.percentage || 0) >= 75 ? 'success.main' : 'error.main',
                           position: 'absolute',
                           left: 0,
                           top: 0,
@@ -436,16 +479,16 @@ const Attendance = () => {
                         }}
                       >
                         <Typography variant="h6" component="div" color="text.secondary">
-                          {`${subject.percentage}%`}
+                          {`${subject.percentage || 0}%`}
                         </Typography>
                       </Box>
                     </Box>
                     
                     <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2, width: '100%' }}>
-                      {subject.attended} of {subject.total} classes attended
+                      {subject.attended || 0} of {subject.total || 0} classes attended
                     </Typography>
                     
-                    {subject.percentage < 75 && (
+                    {(subject.percentage || 0) < 75 && (
                       <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1, textAlign: 'center', width: '100%' }}>
                         Attendance below requirement!
                       </Typography>
@@ -492,9 +535,9 @@ const Attendance = () => {
                       label="Subject"
                     >
                       <MenuItem value="all">All Subjects</MenuItem>
-                      {MOCK_ATTENDANCE_DATA.attendanceBySubject.map(subject => (
+                      {(attendanceData.attendanceBySubject || []).map(subject => (
                         <MenuItem key={subject.id} value={subject.id.toString()}>
-                          {subject.subject}
+                          {subject.subject || 'Unknown Subject'}
                         </MenuItem>
                       ))}
                     </Select>
@@ -535,14 +578,14 @@ const Attendance = () => {
                 
                 <TableContainer 
                   sx={{ 
-                    maxHeight: '500px', 
+                    maxHeight: '60vh', 
                     overflowY: 'auto',
                     border: '1px solid rgba(224, 224, 224, 1)',
                     borderRadius: 1,
                     mb: 3
                   }}
                 >
-                  <Table stickyHeader aria-label="attendance log table">
+                  <Table stickyHeader aria-label="attendance log table" size="small">
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
@@ -552,11 +595,11 @@ const Attendance = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {filteredClasses.map((cls, index) => (
+                      {filteredClasses.length > 0 ? filteredClasses.map((cls, index) => (
                         <TableRow key={index} hover>
-                          <TableCell>{formatDate(cls.date)}</TableCell>
-                          {selectedSubject === 'all' && <TableCell>{cls.subject}</TableCell>}
-                          <TableCell>{cls.topic}</TableCell>
+                          <TableCell>{formatDate(cls.date || '')}</TableCell>
+                          {selectedSubject === 'all' && <TableCell>{cls.subject || ''}</TableCell>}
+                          <TableCell>{cls.topic || ''}</TableCell>
                           <TableCell align="center">
                             <Chip 
                               icon={cls.status === 'present' ? <EventAvailableIcon /> : <EventBusyIcon />}
@@ -566,16 +609,19 @@ const Attendance = () => {
                             />
                           </TableCell>
                         </TableRow>
-                      ))}
+                      )) : (
+                        <TableRow>
+                          <TableCell colSpan={selectedSubject === 'all' ? 4 : 3} align="center">
+                            No attendance records found
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>
                 
                 {filteredClasses.length === 0 && (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography variant="h6" color="text.secondary">
-                      No attendance records found
-                    </Typography>
+                  <Box sx={{ textAlign: 'center', py: 2 }}>
                     <Typography variant="body2" color="text.secondary">
                       Try adjusting your search or filters
                     </Typography>
@@ -585,17 +631,17 @@ const Attendance = () => {
             )}
             
             {selectedTab === 1 && (
-              <Box>
+              <Box sx={{ overflow: 'auto', maxHeight: '70vh' }}>
                 <Typography variant="h6" gutterBottom>
                   Monthly Attendance Trends
                 </Typography>
                 
                 <Grid container spacing={3}>
-                  {(MOCK_ATTENDANCE_DATA.monthlyAttendance || []).map((month, index) => (
+                  {(attendanceData.monthlyAttendance || []).map((month, index) => (
                     <Grid item xs={12} md={4} key={index}>
                       <Paper elevation={2} sx={{ p: 2 }}>
                         <Typography variant="subtitle1" gutterBottom>
-                          {month.month}
+                          {month.month || 'Unknown Month'}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <Box sx={{ width: '100%', mr: 1 }}>
@@ -633,7 +679,7 @@ const Attendance = () => {
                   <Typography variant="subtitle1" gutterBottom>
                     Semester Attendance Summary
                   </Typography>
-                  <TableContainer component={Paper} sx={{ mt: 2, maxHeight: '500px', overflowY: 'auto' }}>
+                  <TableContainer component={Paper} sx={{ mt: 2, maxHeight: '50vh', overflowY: 'auto' }}>
                     <Table size="small" stickyHeader>
                       <TableHead>
                         <TableRow>
@@ -645,16 +691,16 @@ const Attendance = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {(MOCK_ATTENDANCE_DATA.attendanceBySubject || []).map((subject) => (
+                        {(attendanceData.attendanceBySubject || []).map((subject) => (
                           <TableRow key={subject.id}>
-                            <TableCell>{subject.subject}</TableCell>
-                            <TableCell>{subject.total}</TableCell>
-                            <TableCell>{subject.attended}</TableCell>
-                            <TableCell>{subject.percentage}%</TableCell>
+                            <TableCell>{subject.subject || 'Unknown'}</TableCell>
+                            <TableCell>{subject.total || 0}</TableCell>
+                            <TableCell>{subject.attended || 0}</TableCell>
+                            <TableCell>{subject.percentage || 0}%</TableCell>
                             <TableCell>
                               <Chip 
-                                label={subject.percentage >= 75 ? 'Good Standing' : 'Attendance Short'} 
-                                color={subject.percentage >= 75 ? 'success' : 'error'} 
+                                label={(subject.percentage || 0) >= 75 ? 'Good Standing' : 'Attendance Short'} 
+                                color={(subject.percentage || 0) >= 75 ? 'success' : 'error'} 
                                 size="small" 
                               />
                             </TableCell>
@@ -665,8 +711,9 @@ const Attendance = () => {
                           <TableCell>
                             {(() => {
                               try {
-                                return MOCK_ATTENDANCE_DATA.attendanceBySubject?.reduce((sum, subject) => sum + subject.total, 0) || 0;
+                                return (attendanceData.attendanceBySubject || []).reduce((sum, subject) => sum + (subject.total || 0), 0);
                               } catch (error) {
+                                console.error("Error calculating total classes:", error);
                                 return 0;
                               }
                             })()}
@@ -674,17 +721,18 @@ const Attendance = () => {
                           <TableCell>
                             {(() => {
                               try {
-                                return MOCK_ATTENDANCE_DATA.attendanceBySubject?.reduce((sum, subject) => sum + subject.attended, 0) || 0;
+                                return (attendanceData.attendanceBySubject || []).reduce((sum, subject) => sum + (subject.attended || 0), 0);
                               } catch (error) {
+                                console.error("Error calculating attended classes:", error);
                                 return 0;
                               }
                             })()}
                           </TableCell>
-                          <TableCell>{MOCK_ATTENDANCE_DATA.overallAttendance || 0}%</TableCell>
+                          <TableCell>{attendanceData.overallAttendance || 0}%</TableCell>
                           <TableCell>
                             <Chip 
-                              label={(MOCK_ATTENDANCE_DATA.overallAttendance || 0) >= 75 ? 'Good Standing' : 'Attendance Short'} 
-                              color={(MOCK_ATTENDANCE_DATA.overallAttendance || 0) >= 75 ? 'success' : 'error'} 
+                              label={(attendanceData.overallAttendance || 0) >= 75 ? 'Good Standing' : 'Attendance Short'} 
+                              color={(attendanceData.overallAttendance || 0) >= 75 ? 'success' : 'error'} 
                               size="small" 
                             />
                           </TableCell>
