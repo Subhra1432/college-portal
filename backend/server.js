@@ -11,7 +11,12 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+// Configure CORS to allow requests from any origin during development
+app.use(cors({
+  origin: '*', // Allow all origins in development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
