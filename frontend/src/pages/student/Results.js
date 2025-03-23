@@ -726,26 +726,33 @@ const Results = () => {
                     Summary of grades earned across all completed courses.
                   </Typography>
                   
-                  <Box className="grade-distribution">
-                    {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
-                      grade && (
-                        <Card 
-                          key={grade}
-                          elevation={2} 
-                          className={`grade-card grade-${grade.charAt(0).toLowerCase()}`}
-                        >
-                          <Typography variant="h3">
-                            {grade}
-                          </Typography>
-                          <Typography variant="h4">
-                            {count || 0}
-                          </Typography>
-                          <Typography variant="body2">
-                            {count === 1 ? 'course' : 'courses'}
-                          </Typography>
-                        </Card>
-                      )
-                    ))}
+                  <Box sx={{ 
+                    width: '100%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    pb: 2
+                  }}>
+                    <Box className="grade-distribution">
+                      {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
+                        grade && count > 0 && (
+                          <Card 
+                            key={grade}
+                            elevation={2} 
+                            className={`grade-card grade-${grade.charAt(0).toLowerCase()}`}
+                          >
+                            <Typography variant="h3">
+                              {grade}
+                            </Typography>
+                            <Typography variant="h4">
+                              {count}
+                            </Typography>
+                            <Typography variant="body2">
+                              {count === 1 ? 'course' : 'courses'}
+                            </Typography>
+                          </Card>
+                        )
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
                 
