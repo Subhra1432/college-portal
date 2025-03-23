@@ -6,6 +6,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body {
@@ -19,28 +20,27 @@ body {
   flex-direction: column;
   min-height: 100vh;
   height: auto !important;
-  overflow-y: auto !important;
+  overflow: visible !important;
+  position: relative;
 }
 
 /* Main content area should be scrollable */
 .MuiBox-root[component="main"] {
-  overflow-y: auto !important;
+  overflow: visible !important;
   -webkit-overflow-scrolling: touch;
-  max-height: none !important;
-  height: auto !important; /* Ensure content can grow */
-  padding-bottom: 80px !important; /* Additional padding to ensure everything is visible */
-  position: relative !important;
+  height: auto !important;
+  min-height: 100vh;
+  padding-bottom: 80px !important;
+  position: relative;
 }
 
 /* Fix for long content in components */
 .MuiContainer-root {
   max-width: 100%;
-  overflow-x: hidden;
-  overflow-y: visible;
-  padding-bottom: 24px; /* Add some bottom padding for better scroll experience */
-  height: auto !important; /* Allow container to grow with content */
-  position: relative !important;
-  min-height: 100% !important;
+  overflow: visible !important;
+  padding-bottom: 24px;
+  height: auto !important;
+  position: relative;
 }
 
 /* Make tables horizontally scrollable on small screens */
@@ -245,6 +245,7 @@ body {
   height: auto !important;
   overflow: visible !important;
   position: relative;
+  padding-bottom: 40px !important;
 }
 
 /* Fix for Results tabs container */
@@ -252,7 +253,6 @@ body {
   display: flex !important;
   flex-direction: column !important;
   height: auto !important;
-  min-height: auto !important;
   overflow: visible !important;
   position: relative;
 }
@@ -261,7 +261,6 @@ body {
 .results-tabs-container [role="tabpanel"] {
   flex-grow: 1 !important;
   height: auto !important;
-  min-height: auto !important;
   overflow: visible !important;
   position: relative;
 }
@@ -269,7 +268,6 @@ body {
 /* Special fixes for the Overall Performance tab */
 .overall-performance-tab {
   height: auto !important;
-  min-height: auto !important;
   display: flex !important;
   flex-direction: column !important;
   position: relative !important;
@@ -278,7 +276,6 @@ body {
 
 .overall-performance-tab > .MuiPaper-root {
   height: auto !important;
-  min-height: auto !important;
   width: 100% !important;
   position: relative !important;
   overflow: visible !important;
@@ -298,6 +295,13 @@ body {
 }
 
 /* Grade Distribution section */
+.grade-distribution-wrapper {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  margin-bottom: 24px;
+}
+
 .grade-distribution {
   display: flex !important;
   flex-direction: row !important;

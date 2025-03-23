@@ -300,8 +300,7 @@ const Results = () => {
     <Container maxWidth="lg" sx={{ 
       mt: 4, 
       mb: 4, 
-      pb: 8, 
-      overflow: 'visible', 
+      overflow: 'visible',
       height: 'auto',
       position: 'relative'
     }} className="results-container">
@@ -316,7 +315,7 @@ const Results = () => {
         </Alert>
       </Snackbar>
       
-      <Grid container spacing={3} sx={{ position: 'relative' }}>
+      <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <AssessmentIcon sx={{ fontSize: 30, mr: 1, color: 'primary.main' }} />
@@ -449,8 +448,7 @@ const Results = () => {
               p: 3, 
               overflow: 'visible',
               height: 'auto',
-              display: 'flex',
-              flexDirection: 'column'
+              position: 'relative'
             }}
             className="results-tabs-container"
           >
@@ -614,11 +612,9 @@ const Results = () => {
               sx={{ 
                 flexGrow: 1, 
                 overflow: 'visible',
-                display: selectedTab === 1 ? 'flex' : 'none',
-                flexDirection: 'column',
+                display: selectedTab === 1 ? 'block' : 'none',
                 height: 'auto',
-                position: 'relative',
-                width: '100%'
+                position: 'relative'
               }}
               className="overall-performance-tab"
             >
@@ -627,8 +623,6 @@ const Results = () => {
                 overflow: 'visible', 
                 height: 'auto',
                 width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
                 position: 'relative'
               }}>
                 <Box sx={{ mb: 3 }}>
@@ -730,12 +724,7 @@ const Results = () => {
                     Summary of grades earned across all completed courses.
                   </Typography>
                   
-                  <Box sx={{ 
-                    width: '100%',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    pb: 2
-                  }}>
+                  <Box className="grade-distribution-wrapper">
                     <Box className="grade-distribution">
                       {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
                         grade && count > 0 && (
