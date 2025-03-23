@@ -30,6 +30,8 @@ import {
   IconButton,
   TextField,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   CalendarMonth as CalendarIcon,
@@ -177,41 +179,146 @@ const Attendance = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info'
+  });
   
   const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
+    try {
+      setSelectedTab(newValue);
+    } catch (error) {
+      console.error("Error changing tabs:", error);
+      setSnackbar({
+        open: true,
+        message: "Error changing tabs. Please try again.",
+        severity: "error"
+      });
+    }
   };
   
   const handleSubjectChange = (event) => {
-    setSelectedSubject(event.target.value);
+    try {
+      setSelectedSubject(event.target.value);
+    } catch (error) {
+      console.error("Error changing subject:", error);
+      setSnackbar({
+        open: true,
+        message: "Error changing subject. Please try again.",
+        severity: "error"
+      });
+    }
+  };
+
+  const handlePrintReport = () => {
+    try {
+      setSnackbar({
+        open: true,
+        message: "Preparing attendance report for printing...",
+        severity: "info"
+      });
+      // In a real app, this would generate a printable report
+      setTimeout(() => {
+        setSnackbar({
+          open: true,
+          message: "Print functionality will be available soon.",
+          severity: "info"
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Error printing report:", error);
+      setSnackbar({
+        open: true,
+        message: "Error preparing print report. Please try again.",
+        severity: "error"
+      });
+    }
+  };
+
+  const handleDownloadReport = () => {
+    try {
+      setSnackbar({
+        open: true,
+        message: "Preparing attendance report for download...",
+        severity: "info"
+      });
+      // In a real app, this would generate a downloadable file
+      setTimeout(() => {
+        setSnackbar({
+          open: true,
+          message: "Download functionality will be available soon.",
+          severity: "info"
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+      setSnackbar({
+        open: true,
+        message: "Error preparing download. Please try again.",
+        severity: "error"
+      });
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({...snackbar, open: false});
   };
   
   // Filter classes based on selected subject
   const getFilteredClasses = () => {
-    if (selectedSubject === 'all') {
-      return MOCK_ATTENDANCE_DATA.attendanceBySubject.flatMap(subject => 
-        subject.classes.map(cls => ({ ...cls, subject: subject.subject }))
-      ).sort((a, b) => new Date(b.date) - new Date(a.date));
-    } else {
-      const subjectData = MOCK_ATTENDANCE_DATA.attendanceBySubject.find(
-        subject => subject.id === parseInt(selectedSubject)
-      );
-      return subjectData ? subjectData.classes.map(cls => ({ ...cls, subject: subjectData.subject }))
-        .sort((a, b) => new Date(b.date) - new Date(a.date)) : [];
+    try {
+      if (selectedSubject === 'all') {
+        return MOCK_ATTENDANCE_DATA.attendanceBySubject.flatMap(subject => 
+          subject.classes.map(cls => ({ ...cls, subject: subject.subject }))
+        ).sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else {
+        const subjectData = MOCK_ATTENDANCE_DATA.attendanceBySubject.find(
+          subject => subject.id === parseInt(selectedSubject)
+        );
+        return subjectData ? subjectData.classes.map(cls => ({ ...cls, subject: subjectData.subject }))
+          .sort((a, b) => new Date(b.date) - new Date(a.date)) : [];
+      }
+    } catch (error) {
+      console.error("Error filtering classes:", error);
+      setSnackbar({
+        open: true,
+        message: "Error filtering attendance data. Please try again.",
+        severity: "error"
+      });
+      return [];
     }
   };
   
   // Apply search filter
-  const filteredClasses = getFilteredClasses().filter(cls => 
-    cls.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cls.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cls.date.includes(searchTerm)
-  );
+  const filteredClasses = getFilteredClasses().filter(cls => {
+    try {
+      return cls.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cls.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cls.date.includes(searchTerm);
+    } catch (error) {
+      console.error("Error applying search filter:", error);
+      setSnackbar({
+        open: true,
+        message: "Error searching attendance data. Please try again.",
+        severity: "error"
+      });
+      return true; // Return all classes if there's an error
+    }
+  });
   
   // Format date from YYYY-MM-DD to Month DD, YYYY
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString; // Return original string if formatting fails
+    }
   };
   
   return (
@@ -228,6 +335,17 @@ const Attendance = () => {
       }} 
       className="attendance-container"
     >
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -398,10 +516,18 @@ const Attendance = () => {
                   />
                   
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <IconButton color="primary" title="Print Attendance Report">
+                    <IconButton 
+                      color="primary" 
+                      title="Print Attendance Report"
+                      onClick={handlePrintReport}
+                    >
                       <PrintIcon />
                     </IconButton>
-                    <IconButton color="primary" title="Download Attendance Report">
+                    <IconButton 
+                      color="primary" 
+                      title="Download Attendance Report"
+                      onClick={handleDownloadReport}
+                    >
                       <DownloadIcon />
                     </IconButton>
                   </Box>
@@ -465,7 +591,7 @@ const Attendance = () => {
                 </Typography>
                 
                 <Grid container spacing={3}>
-                  {MOCK_ATTENDANCE_DATA.monthlyAttendance.map((month, index) => (
+                  {(MOCK_ATTENDANCE_DATA.monthlyAttendance || []).map((month, index) => (
                     <Grid item xs={12} md={4} key={index}>
                       <Paper elevation={2} sx={{ p: 2 }}>
                         <Typography variant="subtitle1" gutterBottom>
@@ -475,13 +601,13 @@ const Attendance = () => {
                           <Box sx={{ width: '100%', mr: 1 }}>
                             <LinearProgress 
                               variant="determinate" 
-                              value={month.percentage} 
+                              value={month.percentage || 0} 
                               sx={{ 
                                 height: 10, 
                                 borderRadius: 5,
                                 bgcolor: 'grey.300',
                                 '& .MuiLinearProgress-bar': {
-                                  bgcolor: month.percentage >= 75 ? 'success.main' : 'error.main',
+                                  bgcolor: (month.percentage || 0) >= 75 ? 'success.main' : 'error.main',
                                   borderRadius: 5,
                                 }
                               }}
@@ -489,12 +615,12 @@ const Attendance = () => {
                           </Box>
                           <Box>
                             <Typography variant="body2" color="text.secondary">
-                              {`${month.percentage}%`}
+                              {`${month.percentage || 0}%`}
                             </Typography>
                           </Box>
                         </Box>
                         <Typography variant="body2" color="text.secondary">
-                          {month.percentage >= 75 
+                          {(month.percentage || 0) >= 75 
                             ? 'Good attendance this month!' 
                             : 'Attendance below required threshold.'}
                         </Typography>
@@ -519,7 +645,7 @@ const Attendance = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {MOCK_ATTENDANCE_DATA.attendanceBySubject.map((subject) => (
+                        {(MOCK_ATTENDANCE_DATA.attendanceBySubject || []).map((subject) => (
                           <TableRow key={subject.id}>
                             <TableCell>{subject.subject}</TableCell>
                             <TableCell>{subject.total}</TableCell>
@@ -537,16 +663,28 @@ const Attendance = () => {
                         <TableRow sx={{ '& > td': { fontWeight: 'bold', bgcolor: 'rgba(0, 0, 0, 0.04)' } }}>
                           <TableCell>Overall</TableCell>
                           <TableCell>
-                            {MOCK_ATTENDANCE_DATA.attendanceBySubject.reduce((sum, subject) => sum + subject.total, 0)}
+                            {(() => {
+                              try {
+                                return MOCK_ATTENDANCE_DATA.attendanceBySubject?.reduce((sum, subject) => sum + subject.total, 0) || 0;
+                              } catch (error) {
+                                return 0;
+                              }
+                            })()}
                           </TableCell>
                           <TableCell>
-                            {MOCK_ATTENDANCE_DATA.attendanceBySubject.reduce((sum, subject) => sum + subject.attended, 0)}
+                            {(() => {
+                              try {
+                                return MOCK_ATTENDANCE_DATA.attendanceBySubject?.reduce((sum, subject) => sum + subject.attended, 0) || 0;
+                              } catch (error) {
+                                return 0;
+                              }
+                            })()}
                           </TableCell>
-                          <TableCell>{MOCK_ATTENDANCE_DATA.overallAttendance}%</TableCell>
+                          <TableCell>{MOCK_ATTENDANCE_DATA.overallAttendance || 0}%</TableCell>
                           <TableCell>
                             <Chip 
-                              label={MOCK_ATTENDANCE_DATA.overallAttendance >= 75 ? 'Good Standing' : 'Attendance Short'} 
-                              color={MOCK_ATTENDANCE_DATA.overallAttendance >= 75 ? 'success' : 'error'} 
+                              label={(MOCK_ATTENDANCE_DATA.overallAttendance || 0) >= 75 ? 'Good Standing' : 'Attendance Short'} 
+                              color={(MOCK_ATTENDANCE_DATA.overallAttendance || 0) >= 75 ? 'success' : 'error'} 
                               size="small" 
                             />
                           </TableCell>
