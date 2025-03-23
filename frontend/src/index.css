@@ -1,0 +1,106 @@
+/* Global CSS for College Portal */
+
+/* Ensure proper scrolling throughout the application */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* For better scrolling on iOS devices */
+}
+
+/* Set root element to full height to ensure proper layout */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100%;
+}
+
+/* Main content area should be scrollable */
+.MuiBox-root[component="main"] {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  max-height: 100vh;
+}
+
+/* Fix for long content in components */
+.MuiContainer-root {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  padding-bottom: 24px; /* Add some bottom padding for better scroll experience */
+}
+
+/* Make tables horizontally scrollable on small screens */
+.MuiTableContainer-root {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Fix for long tables with many rows */
+.MuiTable-root {
+  width: 100%;
+  display: table;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+/* Ensure Grid layouts don't break scrolling */
+.MuiGrid-container {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Fix for mobile devices */
+@media (max-width: 768px) {
+  .MuiContainer-root {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  /* Adjust table display for mobile */
+  .MuiTableCell-root {
+    padding: 8px;
+  }
+}
+
+/* Fix for components that might be causing overflow issues */
+.MuiCard-root {
+  overflow: visible;
+}
+
+/* Ensure that dialog content can scroll if needed */
+.MuiDialogContent-root {
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+/* Fix for student result page's tabs */
+.MuiTabs-root {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Fix for Attendance page's table */
+.MuiPaper-root .MuiTableContainer-root {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Fix for Payments page */
+.MuiPaper-root .MuiList-root {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Prevent drawer from causing scrolling issues */
+.MuiDrawer-root {
+  position: fixed;
+} 
