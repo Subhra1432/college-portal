@@ -726,48 +726,27 @@ const Results = () => {
                     Summary of grades earned across all completed courses.
                   </Typography>
                   
-                  <Grid container spacing={2} sx={{ 
-                    mt: 2,
-                    width: '100%'
-                  }}>
+                  <Box className="grade-distribution">
                     {Object.entries(resultsData.gradeDistribution || {}).map(([grade, count]) => (
                       grade && (
-                        <Grid item xs={6} sm={4} md={3} lg={2} key={grade}>
-                          <Card 
-                            elevation={2} 
-                            sx={{ 
-                              textAlign: 'center', 
-                              py: 2,
-                              px: 1,
-                              minHeight: '120px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'center',
-                              alignItems: 'center'
-                            }}
-                            className="grade-card"
-                          >
-                            <Typography 
-                              variant="h4" 
-                              sx={{ 
-                                color: getGradeColor(grade),
-                                fontWeight: 'bold',
-                                mb: 1
-                              }}
-                            >
-                              {grade}
-                            </Typography>
-                            <Typography variant="h5" sx={{ mb: 0.5 }}>
-                              {count || 0}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {count === 1 ? 'course' : 'courses'}
-                            </Typography>
-                          </Card>
-                        </Grid>
+                        <Card 
+                          key={grade}
+                          elevation={2} 
+                          className={`grade-card grade-${grade.charAt(0).toLowerCase()}`}
+                        >
+                          <Typography variant="h3">
+                            {grade}
+                          </Typography>
+                          <Typography variant="h4">
+                            {count || 0}
+                          </Typography>
+                          <Typography variant="body2">
+                            {count === 1 ? 'course' : 'courses'}
+                          </Typography>
+                        </Card>
                       )
                     ))}
-                  </Grid>
+                  </Box>
                 </Box>
                 
                 <Box sx={{ textAlign: 'center', mt: 4, mb: 2 }}>

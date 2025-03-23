@@ -289,13 +289,28 @@ body {
   padding: 8px !important;
 }
 
-/* Enhanced styling for grade cards */
+/* Grade Distribution section */
+.grade-distribution {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+
 .grade-card {
+  min-width: 150px !important;
+  flex: 1 0 150px !important;
+  max-width: 200px !important;
+  height: 150px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
-  min-height: 120px !important;
-  height: 100% !important;
   border-radius: 8px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
 .grade-card:hover {
@@ -303,39 +318,61 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* Fix for grade card typography */
-.grade-card .MuiTypography-h4 {
-  font-size: 2rem !important;
+.grade-card .MuiTypography-h3 {
+  font-size: 2.5rem !important;
+  font-weight: bold !important;
   margin-bottom: 8px !important;
 }
 
-.grade-card .MuiTypography-h5 {
-  font-size: 1.5rem !important;
+.grade-card .MuiTypography-h4 {
+  font-size: 2rem !important;
   margin-bottom: 4px !important;
 }
 
-/* Make better use of space in mobile view */
-@media (max-width: 600px) {
-  .results-container .MuiGrid-container .MuiGrid-item {
-    padding: 8px !important;
-  }
-  
-  .grade-card {
-    min-height: 100px !important;
-    padding: 8px !important;
-  }
-  
-  .grade-card .MuiTypography-h4 {
-    font-size: 1.5rem !important;
-  }
-  
-  .grade-card .MuiTypography-h5 {
-    font-size: 1.2rem !important;
-  }
-  
-  .results-container [role="tabpanel"] .MuiTableContainer-root {
-    max-height: 40vh !important;
-  }
+.grade-card .MuiTypography-body2 {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Grade card colors */
+.grade-card.grade-a {
+  background-color: #e8f5e9 !important;
+}
+
+.grade-card.grade-b {
+  background-color: #e3f2fd !important;
+}
+
+.grade-card.grade-c {
+  background-color: #fff3e0 !important;
+}
+
+.grade-card.grade-d {
+  background-color: #fbe9e7 !important;
+}
+
+.grade-card.grade-f {
+  background-color: #ffebee !important;
+}
+
+/* Grade text colors */
+.grade-card.grade-a .MuiTypography-h3 {
+  color: #2e7d32 !important;
+}
+
+.grade-card.grade-b .MuiTypography-h3 {
+  color: #1976d2 !important;
+}
+
+.grade-card.grade-c .MuiTypography-h3 {
+  color: #f57c00 !important;
+}
+
+.grade-card.grade-d .MuiTypography-h3 {
+  color: #d32f2f !important;
+}
+
+.grade-card.grade-f .MuiTypography-h3 {
+  color: #c62828 !important;
 }
 
 /* Fix for custom scrollbars */
