@@ -344,14 +344,14 @@ const Attendance = () => {
           <Paper 
             elevation={3} 
             sx={{ 
-              p: 3,
+              p: 2,
               height: 'auto',
               overflow: 'visible',
               display: 'flex',
               flexDirection: 'column'
             }}
           >
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
               <Tabs 
                 value={selectedTab} 
                 onChange={handleTabChange} 
@@ -365,7 +365,7 @@ const Attendance = () => {
             
             {selectedTab === 0 && (
               <>
-                <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <FormControl sx={{ minWidth: 200 }}>
                     <InputLabel>Subject</InputLabel>
                     <Select
@@ -409,7 +409,7 @@ const Attendance = () => {
                 
                 <TableContainer 
                   sx={{ 
-                    maxHeight: '350px', 
+                    maxHeight: '500px', 
                     overflowY: 'auto',
                     border: '1px solid rgba(224, 224, 224, 1)',
                     borderRadius: 1,
@@ -507,7 +507,7 @@ const Attendance = () => {
                   <Typography variant="subtitle1" gutterBottom>
                     Semester Attendance Summary
                   </Typography>
-                  <TableContainer component={Paper} sx={{ mt: 2, maxHeight: '350px', overflowY: 'auto' }}>
+                  <TableContainer component={Paper} sx={{ mt: 2, maxHeight: '500px', overflowY: 'auto' }}>
                     <Table size="small" stickyHeader>
                       <TableHead>
                         <TableRow>

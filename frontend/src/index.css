@@ -93,8 +93,17 @@ body {
 
 /* Fix for Attendance page's table */
 .MuiPaper-root .MuiTableContainer-root {
-  max-height: 350px;
+  max-height: 500px;
   overflow-y: auto;
+}
+
+/* Optimize table row height to show more content */
+.attendance-container .MuiTableRow-root {
+  height: 48px; /* Slightly reduced from default */
+}
+
+.attendance-container .MuiTableCell-root {
+  padding: 8px 16px; /* Slightly reduced padding */
 }
 
 /* Fix for Attendance page container - ensure it can scroll */
@@ -115,7 +124,7 @@ body {
 
 /* Fix for table in Monthly Stats tab */
 .attendance-container [role="tabpanel"] .MuiTableContainer-root {
-  max-height: 350px;
+  max-height: 500px;
   margin-top: 16px;
   border: 1px solid rgba(224, 224, 224, 1);
   border-radius: 4px;
