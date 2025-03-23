@@ -52,7 +52,7 @@ A comprehensive college portal for students and teachers with responsive design,
 
 1. Clone the repository
 ```
-git clone https://github.com/yourusername/college-portal.git
+git clone https://github.com/Subhra1432/college-portal.git
 cd college-portal
 ```
 
@@ -70,7 +70,7 @@ MONGO_URI=mongodb://localhost:27017/college-portal
 JWT_SECRET=your_jwt_secret_key_here
 EMAIL_SERVICE=gmail
 EMAIL_USERNAME=your_email@gmail.com
-EMAIL_PASSWORD=your_email_password
+EMAIL_PASSWORD=your_password
 CLIENT_URL=http://localhost:3000
 ```
 
@@ -100,4 +100,4 @@ The application should now be running at `http://localhost:3000`.
 ISC
 
 ## Author
-Your Name 
+Subhrakanta Behera
