@@ -46,7 +46,7 @@ export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) =
 
 // Logout a user
 export const logout = createAsyncThunk('auth/logout', async () => {
-  AuthService.logout();
+  await AuthService.logout();
   toast.info('You have been logged out');
 });
 
