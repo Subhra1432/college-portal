@@ -65,7 +65,7 @@
 1. Create a free account at [mongodb.com/atlas](https://www.mongodb.com/cloud/atlas)
 2. Create a new cluster (free M0 tier is sufficient)
 3. Go to **Database Access** → create a database user with a password
-4. Go to **Network Access** → click **Allow Access from Anywhere** (or add `0.0.0.0/0`)
+4. Go to **Network Access** → add your Render service's [outbound IP addresses](https://docs.render.com/static-outbound-ip-addresses), or use `0.0.0.0/0` for initial testing only (restrict to specific IPs for production)
 5. Go to **Database** → click **Connect** → **Connect your application**
 6. Copy the connection string and replace `<password>` with your database user password
 7. Use this as your `MONGO_URI` environment variable

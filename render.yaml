@@ -3,7 +3,7 @@ services:
     name: college-portal
     runtime: node
     plan: free
-    buildCommand: cd backend && npm install && cd ../frontend && npm install && npm run build
+    buildCommand: npm run render-build
     startCommand: cd backend && node server.js
     envVars:
       - key: NODE_ENV
