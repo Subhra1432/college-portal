@@ -9,6 +9,9 @@
     "dev": "cd backend && npm run dev",
     "render-build": "cd backend && npm install && cd ../frontend && npm install && npm run build"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "keywords": ["college", "portal", "mern", "education"],
   "license": "ISC"
 }

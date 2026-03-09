@@ -1,71 +1,103 @@
 # College Portal - Deployment Guide
 
-## Prerequisites
+## Deploy to Render.com (Free — Get a Shareable Link)
 
-- Node.js (v18+) and npm
-- MongoDB Atlas account (free tier available at [mongodb.com/atlas](https://www.mongodb.com/cloud/atlas))
-- A [Render.com](https://render.com) account (free tier available)
+### Step 1: Create a Free MongoDB Database
 
-## Environment Variables
+1. Go to [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas) → **Try Free**
+2. Create an account and a **free M0 cluster**
+3. In the left sidebar, click **Database Access** → **Add New Database User**
+   - Choose **Password** authentication
+   - Set a username and password (remember these!)
+   - Click **Add User**
+4. In the left sidebar, click **Network Access** → **Add IP Address** → **Allow Access from Anywhere** → **Confirm**
+5. Go back to **Database** → click **Connect** on your cluster → **Drivers**
+6. Copy the connection string — it looks like:
+   ```
+   mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   ```
+7. Replace `yourpassword` with the password you set in step 3
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `PORT` | Backend server port (default: 5000) | No |
-| `MONGO_URI` | MongoDB connection string | **Yes** |
-| `JWT_SECRET` | Secret key for JWT token signing (use a strong random value) | **Yes** |
-| `NODE_ENV` | Set to `production` for deployment | **Yes** |
-| `CLIENT_URL` | Your Render app URL for CORS (e.g., `https://college-portal-xxxx.onrender.com`) | **Yes** |
-| `EMAIL_SERVICE` | Email service provider (e.g., gmail) | No |
-| `EMAIL_USERNAME` | Email address for sending notifications | No |
-| `EMAIL_PASSWORD` | App password for the email account | No |
+### Step 2: Deploy to Render
+
+1. Go to [render.com](https://render.com) → sign up with your **GitHub** account
+2. Click **New** → **Web Service**
+3. Connect your `college-portal` GitHub repository
+4. Fill in these settings:
+
+   | Setting | Value |
+   |---------|-------|
+   | **Name** | `college-portal` (or any name you like) |
+   | **Runtime** | `Node` |
+   | **Build Command** | `npm run render-build` |
+   | **Start Command** | `npm start` |
+   | **Instance Type** | `Free` |
+
+5. Scroll down to **Environment Variables** and add:
+
+   | Key | Value |
+   |-----|-------|
+   | `NODE_ENV` | `production` |
+   | `MONGO_URI` | *(paste your MongoDB connection string from Step 1)* |
+   | `JWT_SECRET` | *(any random string, e.g. `my-super-secret-key-12345`)* |
+
+6. Click **Create Web Service**
+
+### Step 3: Get Your Link
+
+- Render will build and deploy your app (takes 2–5 minutes)
+- Once done, you'll see a green **Live** badge and a URL like:
+  ```
+  https://college-portal-xxxx.onrender.com
+  ```
+- **Share this URL** with anyone — they can open it in their browser!
+
+> **Note:** Free Render services sleep after 15 minutes of inactivity. The first visit after sleep takes ~30 seconds to load.
+
+---
+
+## Alternative: Deploy via Render Blueprint (One-Click)
+
+1. Push this repo to your GitHub account
+2. Go to [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint**
+3. Select your repository — Render auto-detects the `render.yaml` file
+4. Fill in `MONGO_URI` when prompted (from Step 1 above)
+5. Click **Apply** — done!
+
+---
 
 ## Local Development
 
-1. Copy `backend/.env.example` to `backend/.env` and fill in your values
-2. Start the backend: `cd backend && npm run dev`
-3. Start the frontend: `cd frontend && npm start`
+```bash
+# Clone and install
+git clone https://github.com/Subhra1432/college-portal.git
+cd college-portal
+npm run install-all
 
-## Deploy to Render (Recommended)
+# Configure environment
+cp backend/.env.example backend/.env
+# Edit backend/.env with your MongoDB URI and a JWT secret
 
-### Option 1: One-Click Deploy with Blueprint
+# Start development servers
+# Terminal 1 - Backend (port 5000)
+npm run dev
 
-1. Push this repository to your GitHub account
-2. Go to [Render Dashboard](https://dashboard.render.com)
-3. Click **New** → **Blueprint**
-4. Connect your GitHub repository — Render will detect the `render.yaml` file
-5. Fill in the required environment variables (`MONGO_URI`, `CLIENT_URL`)
-6. Click **Apply** — Render will build and deploy automatically
-7. Once deployed, set `CLIENT_URL` to your Render app URL (e.g., `https://college-portal-xxxx.onrender.com`)
+# Terminal 2 - Frontend (port 3000)
+cd frontend && npm start
+```
 
-### Option 2: Manual Setup on Render
+Open http://localhost:3000 in your browser.
 
-1. Go to [Render Dashboard](https://dashboard.render.com) → **New** → **Web Service**
-2. Connect your GitHub repository
-3. Configure the service:
-   - **Name**: `college-portal`
-   - **Runtime**: Node
-   - **Build Command**: `cd backend && npm install && cd ../frontend && npm install && npm run build`
-   - **Start Command**: `cd backend && node server.js`
-4. Add environment variables:
-   - `NODE_ENV` = `production`
-   - `MONGO_URI` = your MongoDB Atlas connection string
-   - `JWT_SECRET` = a strong random secret
-   - `CLIENT_URL` = your Render app URL (update after first deploy)
-5. Click **Create Web Service**
+## Environment Variables
 
-### After Deployment
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NODE_ENV` | Yes (deploy) | Set to `production` for deployment |
+| `MONGO_URI` | **Yes** | MongoDB connection string |
+| `JWT_SECRET` | **Yes** | Any random secret string for auth tokens |
+| `PORT` | No | Server port (Render sets this automatically) |
+| `CLIENT_URL` | No | Auto-set by Render; for CORS if frontend is on a different domain |
+| `EMAIL_SERVICE` | No | Email provider for notifications (e.g., `gmail`) |
+| `EMAIL_USERNAME` | No | Email address for sending notifications |
+| `EMAIL_PASSWORD` | No | App password for the email account |
 
-- Your app will be available at `https://your-service-name.onrender.com`
-- Share this URL with anyone to give them access to the portal
-- The backend serves both the API and the React frontend from the same URL
-- **Note**: Free tier services on Render spin down after inactivity; the first request after idle may take ~30 seconds
-
-## Setting Up MongoDB Atlas
-
-1. Create a free account at [mongodb.com/atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a new cluster (free M0 tier is sufficient)
-3. Go to **Database Access** → create a database user with a password
-4. Go to **Network Access** → add your Render service's [outbound IP addresses](https://docs.render.com/static-outbound-ip-addresses), or use `0.0.0.0/0` for initial testing only (restrict to specific IPs for production)
-5. Go to **Database** → click **Connect** → **Connect your application**
-6. Copy the connection string and replace `<password>` with your database user password
-7. Use this as your `MONGO_URI` environment variable

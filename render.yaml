@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     buildCommand: npm run render-build
-    startCommand: cd backend && node server.js
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,10 +13,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        sync: false
-      - key: EMAIL_SERVICE
-        sync: false
-      - key: EMAIL_USERNAME
-        sync: false
-      - key: EMAIL_PASSWORD
-        sync: false
+        fromService:
+          type: web
+          name: college-portal
+          property: url
