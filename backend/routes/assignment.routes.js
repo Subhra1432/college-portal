@@ -1,49 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth.middleware');
+const assignmentController = require('../controllers/assignment.controller');
 
 // @route   GET api/assignments
 // @desc    Get assignments
 // @access  Private
-router.get('/', authMiddleware.protect, (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Assignments route is working',
-    data: []
-  });
-});
+router.get('/', authMiddleware.protect, assignmentController.getAssignments);
 
 // @route   POST api/assignments
 // @desc    Create an assignment
 // @access  Private (Teachers only)
-router.post('/', authMiddleware.protect, authMiddleware.authorize('teacher'), (req, res) => {
-  res.status(201).json({
-    success: true,
-    message: 'Assignment created successfully',
-    data: {}
-  });
-});
+router.post('/', authMiddleware.protect, authMiddleware.authorize('teacher'), assignmentController.createAssignment);
 
 // @route   POST api/assignments/:id/submit
 // @desc    Submit an assignment
 // @access  Private (Students only)
-router.post('/:id/submit', authMiddleware.protect, authMiddleware.authorize('student'), (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Assignment submitted successfully',
-    data: {}
-  });
-});
+router.post('/:id/submit', authMiddleware.protect, authMiddleware.authorize('student'), assignmentController.submitAssignment);
 
 // @route   GET api/assignments/:id
 // @desc    Get a specific assignment
 // @access  Private
-router.get('/:id', authMiddleware.protect, (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Assignment retrieved successfully',
-    data: {}
-  });
-});
+router.get('/:id', authMiddleware.protect, assignmentController.getAssignment);
 
-module.exports = router; 
+module.exports = router;

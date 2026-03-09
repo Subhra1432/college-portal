@@ -42,79 +42,36 @@ const App = () => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    console.log('App.js: Initial render, checking auth status');
     dispatch(checkAuth());
   }, [dispatch]);
 
-  useEffect(() => {
-    console.log('App.js: Auth state changed:', { isAuthenticated, user, loading });
-  }, [isAuthenticated, user, loading]);
-
   // Protected route component
   const ProtectedRoute = ({ children }) => {
-    console.log('ProtectedRoute: Checking auth status:', { isAuthenticated, loading });
-    
     if (loading) {
-      console.log('ProtectedRoute: Still loading, showing loading indicator');
       return <div>Loading...</div>;
     }
     
-    // Check localStorage first for immediate access
-    const localIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    
-    if (!isAuthenticated && !localIsAuthenticated) {
-      console.log('ProtectedRoute: Not authenticated, redirecting to login');
+    if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }
 
-    console.log('ProtectedRoute: Authenticated, rendering children');
     return children;
   };
 
   // Role-based protected route
   const RoleRoute = ({ roles, children }) => {
-    console.log('RoleRoute: Checking auth and role:', { isAuthenticated, userRole: user?.role, expectedRoles: roles, loading });
-    
     if (loading) {
-      console.log('RoleRoute: Still loading, showing loading indicator');
       return <div>Loading...</div>;
     }
     
-    // Check localStorage first for immediate access
-    const localIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    
-    // Get user from localStorage if Redux state doesn't have it
-    let currentUser = user;
-    if (!currentUser) {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          currentUser = JSON.parse(storedUser);
-          console.log('RoleRoute: Using user from localStorage:', currentUser);
-        } catch (e) {
-          console.error('Error parsing user from localStorage:', e);
-        }
-      }
-    }
-    
-    if (!isAuthenticated && !localIsAuthenticated) {
-      console.log('RoleRoute: Not authenticated, redirecting to login');
+    if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }
 
-    if (currentUser && !roles.includes(currentUser.role)) {
-      console.log(`RoleRoute: User role (${currentUser.role}) does not match required roles (${roles.join(', ')}), redirecting to dashboard`);
+    if (user && !roles.includes(user.role)) {
       return <Navigate to="/dashboard" />;
     }
-    
-    // If we don't have the user yet but we're authenticated, just render the children
-    // This allows routing to work while user data is being loaded
-    if (!currentUser && (isAuthenticated || localIsAuthenticated)) {
-      console.log('RoleRoute: Authenticated but no user data yet, rendering children anyway');
-      return children;
-    }
 
-    console.log('RoleRoute: User has required role, rendering children');
     return children;
   };
 

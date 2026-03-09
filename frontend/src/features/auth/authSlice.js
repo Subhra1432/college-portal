@@ -5,40 +5,9 @@ import AuthService from '../../services/auth.service';
 // Check if user is already authenticated
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, thunkAPI) => {
   try {
-    console.log('checkAuth thunk: Checking if user is authenticated');
-    
-    // First check localStorage directly for faster access
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        console.log('checkAuth thunk: Found user in localStorage:', parsedUser);
-        
-        // Return the user from localStorage first for immediate authentication
-        setTimeout(() => {
-          // After a short delay, also try to validate with the backend
-          // This is a non-blocking operation that will quietly update the state if successful
-          AuthService.getCurrentUser().catch(e => 
-            console.log('Background validation failed, but using cached user:', e.message)
-          );
-        }, 100);
-        
-        return parsedUser;
-      } catch (parseError) {
-        console.log('checkAuth thunk: Error parsing stored user:', parseError.message);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-      }
-    }
-    
-    // If no stored user or parsing failed, try to get from backend
-    console.log('checkAuth thunk: No valid user in localStorage, checking backend');
     const user = await AuthService.getCurrentUser();
-    console.log('checkAuth thunk: User authenticated from backend:', user);
     return user;
   } catch (error) {
-    console.log('checkAuth thunk: Authentication failed:', error.message);
     return thunkAPI.rejectWithValue(error.message || 'Failed to authenticate');
   }
 });
@@ -62,19 +31,14 @@ export const register = createAsyncThunk(
 // Login a user
 export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
   try {
-    console.log('login thunk: Attempting to login user');
     const response = await AuthService.login(userData);
-    console.log('login thunk: Login successful:', response);
     toast.success('Login successful!');
     return response;
   } catch (error) {
-    console.log('login thunk: Login failed:', error);
-    // Properly extract error message from various error formats
     const message = 
       error.response?.data?.message || 
       error.message || 
       'Login failed';
-    console.log('login thunk: Error message:', message);
     toast.error(message);
     return thunkAPI.rejectWithValue(message);
   }
@@ -82,7 +46,7 @@ export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) =
 
 // Logout a user
 export const logout = createAsyncThunk('auth/logout', async () => {
-  await AuthService.logout();
+  AuthService.logout();
   toast.info('You have been logged out');
 });
 
@@ -138,24 +102,6 @@ export const authSlice = createSlice({
       // Check Auth
       .addCase(checkAuth.pending, (state) => {
         state.loading = true;
-        
-        // Immediately check localStorage for faster authentication
-        const localIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-        if (localIsAuthenticated) {
-          console.log('checkAuth.pending: Found isAuthenticated=true in localStorage');
-          state.isAuthenticated = true;
-          
-          // Try to get user from localStorage
-          try {
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-              state.user = JSON.parse(storedUser);
-              console.log('checkAuth.pending: Using user from localStorage:', state.user);
-            }
-          } catch (e) {
-            console.error('Error parsing user from localStorage:', e);
-          }
-        }
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.loading = false;
@@ -184,19 +130,16 @@ export const authSlice = createSlice({
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
-        console.log('Redux state - login.pending:', { ...state });
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
         state.error = null;
-        console.log('Redux state - login.fulfilled:', { ...state, user: action.payload });
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        console.log('Redux state - login.rejected:', { ...state, error: action.payload });
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {

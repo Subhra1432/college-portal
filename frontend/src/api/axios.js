@@ -2,14 +2,16 @@ import axios from 'axios';
 
 // Function to determine the backend URL based on the current environment
 const getBaseURL = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
   // If running on localhost, connect to the local server
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:5000/api';
   }
   
-  // If connecting from another device on the same network, use the server IP
-  // This assumes the backend is running on the same machine as the frontend
-  // The IP will be determined at runtime based on the current server
+  // If connecting from another device on the same network
   return `http://${window.location.hostname}:5000/api`;
 };
 
