@@ -70,7 +70,7 @@
 
 ```bash
 # Clone and install
-git clone https://github.com/Subhra1432/college-portal.git
+git clone <your-repository-url>
 cd college-portal
 npm run install-all
 
