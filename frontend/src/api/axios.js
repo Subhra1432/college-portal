@@ -6,6 +6,11 @@ const getBaseURL = () => {
     return process.env.REACT_APP_API_URL;
   }
   
+  // In production, the backend serves the frontend from the same origin
+  if (process.env.NODE_ENV === 'production') {
+    return '/api';
+  }
+
   // If running on localhost, connect to the local server
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:5000/api';
